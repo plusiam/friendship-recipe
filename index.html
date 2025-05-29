@@ -16,7 +16,7 @@
         .font-gowun { font-family: 'Gowun Dodum', sans-serif; }
         .font-dongle { font-family: 'Dongle', sans-serif; }
         .theme-radio:checked + label {
-            border-color: #0ea5e9;
+            border-color: #0ea5e9; /* Tailwind sky-500 */
             transform: scale(1.05);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
@@ -35,16 +35,16 @@
                 <label class="text-lg font-semibold text-gray-700 mb-2 block">1. 카드 테마 선택</label>
                 <div id="theme-selector" class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <input type="radio" name="theme" id="theme-pastel" value="pastel" class="hidden theme-radio" checked>
-                    <label for="theme-pastel" class="p-3 text-center rounded-lg cursor-pointer transition border-2 border-transparent" style="background: linear-gradient(135deg, #fef3c7, #fce7f3, #e0f2fe);">솜사탕 파스텔</label>
+                    <label for="theme-pastel" class="p-3 text-center rounded-lg cursor-pointer transition border-2 border-transparent hover:shadow-md" style="background: linear-gradient(135deg, #fef3c7, #fce7f3, #e0f2fe);">솜사탕 파스텔</label>
                     
                     <input type="radio" name="theme" id="theme-green" value="green" class="hidden theme-radio">
-                    <label for="theme-green" class="p-3 text-center rounded-lg cursor-pointer transition border-2 border-transparent" style="background: linear-gradient(135deg, #f0fdf4, #e3f3e5);">싱그러운 초록</label>
+                    <label for="theme-green" class="p-3 text-center rounded-lg cursor-pointer transition border-2 border-transparent hover:shadow-md" style="background: linear-gradient(135deg, #f0fdf4, #e3f3e5);">싱그러운 초록</label>
 
                     <input type="radio" name="theme" id="theme-orange" value="orange" class="hidden theme-radio">
-                    <label for="theme-orange" class="p-3 text-center rounded-lg cursor-pointer transition border-2 border-transparent" style="background: linear-gradient(135deg, #fff7ed, #ffedd5);">상큼한 오렌지</label>
+                    <label for="theme-orange" class="p-3 text-center rounded-lg cursor-pointer transition border-2 border-transparent hover:shadow-md" style="background: linear-gradient(135deg, #fff7ed, #ffedd5);">상큼한 오렌지</label>
 
                     <input type="radio" name="theme" id="theme-navy" value="navy" class="hidden theme-radio">
-                    <label for="theme-navy" class="p-3 text-center rounded-lg cursor-pointer transition border-2 border-transparent text-white" style="background-color: #1e3a8a;">깊은 밤 네이비</label>
+                    <label for="theme-navy" class="p-3 text-center rounded-lg cursor-pointer transition border-2 border-transparent text-white hover:shadow-md" style="background-color: #1e3a8a;">깊은 밤 네이비</label>
                 </div>
             </div>
 
@@ -81,8 +81,8 @@
 
     <div id="previewModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
         <div class="bg-white p-4 rounded-xl shadow-2xl relative max-w-4xl w-full">
-            <button id="closeModalBtn" class="absolute -top-3 -right-3 bg-white rounded-full p-1 shadow-lg w-8 h-8 flex items-center justify-center text-xl font-bold">&times;</button>
-            <div id="recipeCardWrapper">
+            <button id="closeModalBtn" class="absolute -top-3 -right-3 bg-white rounded-full p-1 shadow-lg w-8 h-8 flex items-center justify-center text-xl font-bold text-gray-700 hover:text-red-500">&times;</button>
+            <div id="recipeCardWrapper" style="width: 560px; height: 400px; margin: auto;"> 
                 </div>
         </div>
     </div>
@@ -104,66 +104,86 @@
 
         const themes = {
             pastel: {
-                cardBg: "bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-100", titleColor: "text-sky-700", toColor: "text-pink-600", fromColor: "text-blue-600",
-                sectionBg: "bg-white/60", ingTitleColor: "text-yellow-600", instTitleColor: "text-lime-600"
+                cardClass: "bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-100", titleClass: "text-sky-700", subTitleClass: "text-pink-500",
+                toFromClass: "text-gray-700", toNameClass: "text-pink-600", fromNameClass: "text-blue-600",
+                sectionBgClass: "bg-white/60", ingTitleClass: "text-yellow-600", instTitleClass: "text-lime-600",
+                footerClass: "text-gray-500", footerBgClass: "bg-white/60"
             },
             green: {
-                cardBg: "bg-gradient-to-br from-green-100 to-lime-200", titleColor: "text-green-800", toColor: "text-emerald-600", fromColor: "text-teal-600",
-                sectionBg: "bg-white/70", ingTitleColor: "text-yellow-700", instTitleColor: "text-green-700"
+                cardClass: "bg-gradient-to-br from-green-100 to-lime-200", titleClass: "text-green-800", subTitleClass: "text-green-600",
+                toFromClass: "text-gray-700", toNameClass: "text-emerald-600", fromNameClass: "text-teal-600",
+                sectionBgClass: "bg-white/70", ingTitleClass: "text-yellow-700", instTitleClass: "text-green-700",
+                footerClass: "text-gray-600", footerBgClass: "bg-white/70"
             },
             orange: {
-                cardBg: "bg-gradient-to-br from-orange-100 to-amber-200", titleColor: "text-orange-800", toColor: "text-red-600", fromColor: "text-yellow-700",
-                sectionBg: "bg-white/70", ingTitleColor: "text-amber-700", instTitleColor: "text-orange-700"
+                cardClass: "bg-gradient-to-br from-orange-100 to-amber-200", titleClass: "text-orange-800", subTitleClass: "text-red-500",
+                toFromClass: "text-gray-700", toNameClass: "text-red-600", fromNameClass: "text-yellow-700",
+                sectionBgClass: "bg-white/70", ingTitleClass: "text-amber-700", instTitleClass: "text-orange-700",
+                footerClass: "text-gray-600", footerBgClass: "bg-white/70"
             },
             navy: {
-                cardBg: "bg-gray-800 text-white", titleColor: "text-amber-300", toColor: "text-pink-300", fromColor: "text-sky-300",
-                sectionBg: "bg-gray-700/50", ingTitleColor: "text-yellow-300", instTitleColor: "text-lime-300"
+                cardClass: "bg-gray-800 text-white", titleClass: "text-amber-300", subTitleClass: "text-sky-300",
+                toFromClass: "text-gray-300", toNameClass: "text-pink-300", fromNameClass: "text-sky-300",
+                sectionBgClass: "bg-gray-700/50", ingTitleClass: "text-yellow-300", instTitleClass: "text-lime-300",
+                footerClass: "text-gray-400", footerBgClass: "bg-gray-700/50"
             }
         };
 
         function applyThemeAndContent() {
             const data = {
-                theme: document.querySelector('input[name="theme"]:checked').value,
-                recipeName: document.getElementById('recipe_name').value || '나의 멋진 레시피',
-                friendName: document.getElementById('friend_name').value || '소중한 당신에게',
-                senderName: document.getElementById('sender_name').value || '마음을 담아',
+                themeName: document.querySelector('input[name="theme"]:checked').value,
+                recipeName: document.getElementById('recipe_name').value || '소중한 우정 레시피',
+                friendName: document.getElementById('friend_name').value || '소중한 나의 친구에게',
+                senderName: document.getElementById('sender_name').value || '너의 진정한 친구가',
                 instructions: document.getElementById('instructions').value || '이 레시피의 비법은 바로 사랑입니다!',
                 ingredients: Array.from(document.querySelectorAll('.ingredient-input')).map(i => i.value).filter(v => v)
             };
 
-            const theme = themes[data.theme] || themes.pastel;
-            const isDark = data.theme === 'navy';
+            const currentTheme = themes[data.themeName] || themes.pastel;
 
             let ingredientsHtml = data.ingredients.length > 0
-                ? data.ingredients.map(ing => `<li>- ${ing}</li>`).join('')
-                : `<li>- 사랑 한 스푼</li><li>- 정성 두 컵</li>`;
+                ? data.ingredients.map(ing => `<li><span class="${currentTheme.ingTitleClass} mr-1">•</span> ${ing}</li>`).join('')
+                : ['믿음 한 줌', '웃음 2스푼', '배려 적당히', '소통 듬뿍'].map(ing => `<li><span class="${currentTheme.ingTitleClass} mr-1">•</span> ${ing}</li>`).join('');
 
-            // [개선] 자동 폰트 크기 조절 로직
             const textLength = data.instructions.length;
-            let instClasses = 'text-md mt-2 whitespace-pre-wrap leading-relaxed';
-            if (textLength > 350) instClasses = 'text-sm mt-2 whitespace-pre-wrap leading-snug';
-            if (textLength > 500) instClasses = 'text-xs mt-2 whitespace-pre-wrap leading-normal';
-
-            const imageHtml = uploadedImageSrc ? `<div class="mt-4"><img src="${uploadedImageSrc}" class="rounded-lg shadow-md w-full object-cover max-h-40"/></div>` : '';
+            let instClasses = 'text-sm whitespace-pre-wrap leading-normal'; // 기본
+            if (textLength > 300) instClasses = 'text-[10px] whitespace-pre-wrap leading-tight';
+            else if (textLength > 180) instClasses = 'text-xs whitespace-pre-wrap leading-normal';
+            
+            const imageHtml = uploadedImageSrc ? 
+                `<div id="pdfImageContainer" class="mt-4 ${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-dongle font-bold ${currentTheme.toNameClass} mb-2 flex items-center"><span class="mr-1">📸</span> 추억 한 장</h3>
+                    <img id="pdfImage" src="${uploadedImageSrc}" class="rounded-md shadow-sm w-full h-20 object-cover"/>
+                 </div>` : '';
             
             recipeCardWrapper.innerHTML = `
-            <div id="recipeCard" class="font-gowun p-8 rounded-2xl shadow-lg w-full ${theme.cardBg}">
-                <div class="text-center mb-6">
-                    <h2 class="text-4xl font-dongle font-bold ${theme.titleColor}">${data.recipeName}</h2>
-                    <div class="text-lg mt-2 flex justify-between ${isDark ? 'text-gray-300' : 'text-gray-700'}">
-                        <span>To. <span class="font-bold ${theme.toColor}">${data.friendName}</span></span>
-                        <span>From. <span class="font-bold ${theme.fromColor}">${data.senderName}</span></span>
+            <div id="recipeCard" class="font-gowun p-4 rounded-xl shadow-lg w-full h-full flex flex-col justify-between ${currentTheme.cardClass}" style="border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 3px dashed white; background: ${currentTheme.cardClass.includes('gradient') ? currentTheme.cardClass.replace('bg-gradient-to-br ', '') : currentTheme.cardClass.replace('bg-', '')};">
+                <div class="text-center">
+                    <h2 class="text-3xl font-dongle font-bold ${currentTheme.titleClass} leading-tight">${data.recipeName}</h2>
+                    <p class="text-lg ${currentTheme.subTitleClass} mt-1 font-gowun">✨ 우정을 위한 특별한 레시피 ✨</p>
+                    <div class="flex justify-between items-center text-md ${currentTheme.toFromClass} mt-2 mb-3">
+                        <span class="bg-opacity-50 px-3 py-1 rounded-full text-xs ${currentTheme.sectionBgClass.replace('bg-white/','bg-pink-').replace('/60','').replace('/70','')}"><span class="font-semibold">To.</span> <span id="pdf_friend_name" class="font-bold ${currentTheme.toNameClass}">${data.friendName}</span></span>
+                        <span class="bg-opacity-50 px-3 py-1 rounded-full text-xs ${currentTheme.sectionBgClass.replace('bg-white/','bg-blue-').replace('/60','').replace('/70','')}"><span class="font-semibold">From.</span> <span id="pdf_sender_name" class="font-bold ${currentTheme.fromNameClass}">${data.senderName}</span></span>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="p-4 rounded-lg ${theme.sectionBg}">
-                        <h3 class="text-2xl font-dongle font-bold ${theme.ingTitleColor}">⭐ 재료</h3>
-                        <ul class="text-lg mt-2 space-y-1">${ingredientsHtml}</ul>
+                <div class="flex-1 flex gap-4 overflow-hidden">
+                    <div class="flex-1 space-y-3">
+                        <div class="${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm">
+                            <h3 class="text-xl font-dongle font-bold ${currentTheme.ingTitleClass} mb-2 flex items-center"><span class="mr-1">⭐</span> 우정 재료</h3>
+                            <ul class="space-y-1 text-sm ${currentTheme.toFromClass}">${ingredientsHtml}</ul>
+                        </div>
                         ${imageHtml}
                     </div>
-                    <div class="p-4 rounded-lg ${theme.sectionBg}">
-                        <h3 class="text-2xl font-dongle font-bold ${theme.instTitleColor}">🍳 만드는 방법</h3>
-                        <p class="${instClasses}">${data.instructions}</p>
+                    <div class="flex-1">
+                        <div class="${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm h-full">
+                            <h3 class="text-xl font-dongle font-bold ${currentTheme.instTitleClass} mb-2 flex items-center"><span class="mr-1">🍳</span> 만드는 방법</h3>
+                            <p class="${instClasses} ${currentTheme.toFromClass} overflow-hidden">${data.instructions}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <div class="inline-flex items-center ${currentTheme.footerBgClass} px-4 py-2 rounded-full">
+                        <span class="text-xs ${currentTheme.footerClass}">💖 우정을 담아, ${new Date().toLocaleDateString('ko-KR')}</span>
                     </div>
                 </div>
             </div>`;
@@ -209,25 +229,30 @@
             generatePdfBtn.innerText = 'PDF 만드는 중...';
             generatePdfBtn.disabled = true;
 
-            applyThemeAndContent();
-            await new Promise(resolve => setTimeout(resolve, 500));
+            applyThemeAndContent(); // 미리보기를 위해 이미 호출되었을 수 있지만, 최종 데이터로 한번 더 호출
             
-            const card = document.getElementById('recipeCard');
-            if(!card) {
-                console.error("Card element for PDF generation not found!");
+            // recipeCard가 recipeCardWrapper 내부에 생성되므로, 해당 요소를 대상으로 canvas 생성
+            const cardToCapture = document.getElementById('recipeCard'); 
+            if(!cardToCapture) {
+                console.error("Card element for PDF generation not found inside wrapper!");
                 generatePdfBtn.innerText = 'PDF로 저장하기 💌';
                 generatePdfBtn.disabled = false;
                 return;
             }
 
-            const canvas = await html2canvas(card, { scale: 3, useCORS: true, logging: false });
+            await new Promise(resolve => setTimeout(resolve, 500)); // 렌더링 시간 확보
+            
+            const canvas = await html2canvas(cardToCapture, { 
+                scale: 3, 
+                useCORS: true, 
+                logging: false,
+                backgroundColor: null // 배경 투명하게
+            });
             const imgData = canvas.toDataURL('image/png');
             
-            const doc = new jsPDF('l', 'mm', 'a4');
-            const imgWidth = 297;
-            const imgHeight = card.offsetHeight * imgWidth / card.offsetWidth;
-            doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-            doc.save('my_recipe_card.pdf');
+            const doc = new jsPDF('l', 'mm', [148, 105]); // 가로형 엽서 (148mm x 105mm)
+            doc.addImage(imgData, 'PNG', 0, 0, 148, 105);
+            doc.save('my_friendship_recipe_card.pdf');
 
             generatePdfBtn.innerText = 'PDF로 저장하기 💌';
             generatePdfBtn.disabled = false;
