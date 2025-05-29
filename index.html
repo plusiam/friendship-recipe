@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나만의 레시피 카드 편집기</title>
+    <title>우정 레시피 카드</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -26,7 +26,7 @@
 
     <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-6 md:p-10 space-y-8">
         <div class="text-center">
-            <h1 class="text-4xl font-bold text-gray-800 font-dongle">나만의 레시피 카드 편집기 🎨</h1>
+            <h1 class="text-4xl font-bold text-gray-800 font-dongle">우정 레시피 카드 🎨</h1>
             <p class="text-gray-500 mt-2">세상에 단 하나뿐인 레시피 카드를 직접 디자인해보세요!</p>
         </div>
 
@@ -83,7 +83,7 @@
         <div class="bg-white p-4 rounded-xl shadow-2xl relative max-w-4xl w-full">
             <button id="closeModalBtn" class="absolute -top-3 -right-3 bg-white rounded-full p-1 shadow-lg w-8 h-8 flex items-center justify-center text-xl font-bold text-gray-700 hover:text-red-500">&times;</button>
             <div id="recipeCardWrapper" style="width: 560px; height: 400px; margin: auto;"> 
-                </div>
+            </div>
         </div>
     </div>
     
@@ -140,13 +140,14 @@
             };
 
             const currentTheme = themes[data.themeName] || themes.pastel;
+            const isDark = data.themeName === 'navy';
 
             let ingredientsHtml = data.ingredients.length > 0
                 ? data.ingredients.map(ing => `<li><span class="${currentTheme.ingTitleClass} mr-1">•</span> ${ing}</li>`).join('')
                 : ['믿음 한 줌', '웃음 2스푼', '배려 적당히', '소통 듬뿍'].map(ing => `<li><span class="${currentTheme.ingTitleClass} mr-1">•</span> ${ing}</li>`).join('');
 
             const textLength = data.instructions.length;
-            let instClasses = 'text-sm whitespace-pre-wrap leading-normal'; // 기본
+            let instClasses = 'text-sm whitespace-pre-wrap leading-normal';
             if (textLength > 300) instClasses = 'text-[10px] whitespace-pre-wrap leading-tight';
             else if (textLength > 180) instClasses = 'text-xs whitespace-pre-wrap leading-normal';
             
@@ -229,9 +230,8 @@
             generatePdfBtn.innerText = 'PDF 만드는 중...';
             generatePdfBtn.disabled = true;
 
-            applyThemeAndContent(); // 미리보기를 위해 이미 호출되었을 수 있지만, 최종 데이터로 한번 더 호출
+            applyThemeAndContent(); 
             
-            // recipeCard가 recipeCardWrapper 내부에 생성되므로, 해당 요소를 대상으로 canvas 생성
             const cardToCapture = document.getElementById('recipeCard'); 
             if(!cardToCapture) {
                 console.error("Card element for PDF generation not found inside wrapper!");
@@ -240,17 +240,17 @@
                 return;
             }
 
-            await new Promise(resolve => setTimeout(resolve, 500)); // 렌더링 시간 확보
+            await new Promise(resolve => setTimeout(resolve, 500)); 
             
             const canvas = await html2canvas(cardToCapture, { 
                 scale: 3, 
                 useCORS: true, 
                 logging: false,
-                backgroundColor: null // 배경 투명하게
+                backgroundColor: null 
             });
             const imgData = canvas.toDataURL('image/png');
             
-            const doc = new jsPDF('l', 'mm', [148, 105]); // 가로형 엽서 (148mm x 105mm)
+            const doc = new jsPDF('l', 'mm', [148, 105]); 
             doc.addImage(imgData, 'PNG', 0, 0, 148, 105);
             doc.save('my_friendship_recipe_card.pdf');
 
