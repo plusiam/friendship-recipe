@@ -16,44 +16,37 @@
         .font-gowun { font-family: 'Gowun Dodum', sans-serif; }
         .font-dongle { font-family: 'Dongle', sans-serif; }
         .theme-radio:checked + label {
-            border-color: #0ea5e9; /* Tailwind sky-500 */
+            border-color: #0ea5e9;
             transform: scale(1.05);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        /* 공유 모드에서 카드 표시를 위한 스타일 */
         #sharedCardDisplayArea {
             display: flex;
-            flex-direction: column; /* 세로 정렬 */
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             width: 100%;
-            min-height: 100vh; /* 전체 화면 높이 */
+            min-height: 100vh;
             padding: 1rem;
         }
-        /* recipeCardWrapper의 기본 스타일 조정 (공유 모드 및 미리보기 모달 공통 사용 가능하도록) */
-        #recipeCardWrapper, #recipeCardWrapperShared { /* #recipeCardWrapperShared 에도 동일 스타일 적용 */
-            width: 560px; /* 고정 너비 */
-            height: 400px; /* 고정 높이 */
-            margin: auto; /* 중앙 정렬 */
+        #recipeCardWrapper, #recipeCardWrapperShared {
+            width: 560px;
+            height: 400px;
+            margin: auto;
         }
         @media print {
             body * { visibility: hidden; }
-            /* 인쇄 시에는 #recipeCardWrapperShared 내부의 #recipeCard를 대상으로 할 수도 있으므로,
-               혹은 #recipeCardWrapper를 공통으로 사용하고 있다면 그것을 대상으로 합니다.
-               여기서는 PDF 생성을 html2canvas로 하므로, 이 @media print는 브라우저 직접 인쇄 시에만 주로 영향.
-               html2canvas는 현재 화면의 스타일을 기준으로 캡처합니다.
-            */
-            #recipeCard, #recipeCard * { visibility: visible; } /* #recipeCard 자체와 그 자식들만 보이도록 */
+            #recipeCard, #recipeCard * { visibility: visible; }
             #recipeCard { 
                 position: absolute; left: 0; top: 0; 
-                width: 100vw; /* 뷰포트 너비 */
-                height: calc(100vw * (400 / 560)); /* 뷰포트 너비에 따른 비율 높이 */
+                width: 100vw;
+                height: calc(100vw * (400 / 560));
                 max-height: 100vh;
                 margin: 0; 
-                transform: scale(1); /* 실제 크기로 인쇄되도록 스케일 조정 제거 또는 1로 */
+                transform: scale(1);
                 transform-origin: top left;
-                box-shadow: none !important; /* 인쇄 시 불필요한 그림자 제거 */
-                border: none !important; /* 인쇄 시 불필요한 테두리 제거 */
+                box-shadow: none !important;
+                border: none !important;
                 -webkit-print-color-adjust: exact !important; 
                 color-adjust: exact !important; 
             }
@@ -133,13 +126,15 @@
         <div class="bg-white p-4 rounded-xl shadow-2xl relative max-w-4xl w-auto">
             <button id="closeModalBtn" class="absolute -top-3 -right-3 bg-white rounded-full p-1 shadow-lg w-8 h-8 flex items-center justify-center text-xl font-bold text-gray-700 hover:text-red-500">&times;</button>
             <div id="recipeCardWrapper">
-                </div>
+                <!-- 카드 미리보기가 여기에 표시됩니다 -->
+            </div>
         </div>
     </div>
 
     <div id="sharedCardDisplayArea" class="hidden w-full">
         <div id="recipeCardWrapperShared" class="mx-auto">
-            </div>
+            <!-- 공유된 카드가 여기에 표시됩니다 -->
+        </div>
         <button id="printSharedCardBtn" class="block mx-auto mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition no-print">이 카드 PDF로 저장하기 🖨️</button>
     </div>
     
@@ -180,7 +175,7 @@
             navy: { cardClass: "bg-gray-800 text-white", titleClass: "text-amber-300", subTitleClass: "text-sky-300", toFromClass: "text-gray-300", toNameClass: "text-pink-300", fromNameClass: "text-sky-300", sectionBgClass: "bg-gray-700/50", ingTitleClass: "text-yellow-300", instTitleClass: "text-lime-300", footerClass: "text-gray-400", footerBgClass: "bg-gray-700/50" }
         };
 
-        function generateCardHTML(data) { // forPDF 파라미터 제거 (더 이상 사용 안 함)
+        function generateCardHTML(data) {
             const currentTheme = themes[data.themeName] || themes.pastel;
             const creationDate = data.date || new Date().toLocaleDateString('ko-KR');
 
@@ -195,35 +190,35 @@
             
             const imageHtml = data.imageSrc ? 
                  `<div class="mt-4 ${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm">
-                     <h3 class="text-lg font-dongle font-bold <span class="math-inline">\{currentTheme\.toNameClass\} mb\-2 flex items\-center"\><span class\="mr\-1"\>📸</span\> 추억 한 장</h3\>
-<img src\="</span>{data.imageSrc}" class="rounded-md shadow-sm w-full max-h-24 object-contain"/>
+                     <h3 class="text-lg font-dongle font-bold ${currentTheme.toNameClass} mb-2 flex items-center"><span class="mr-1">📸</span> 추억 한 장</h3>
+                     <img src="${data.imageSrc}" class="rounded-md shadow-sm w-full max-h-24 object-contain"/>
                   </div>` : '';
             
             const cardClasses = `font-gowun p-4 rounded-xl shadow-lg w-full h-full flex flex-col justify-between ${currentTheme.cardClass}`;
-            const borderColor = data.themeName === 'navy' ? '#4b5563' : 'white'; // Navy 테마는 어두운 회색, 나머지는 흰색
+            const borderColor = data.themeName === 'navy' ? '#4b5563' : 'white';
 
             return `
             <div id="recipeCard" class="${cardClasses}" style="border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 3px dashed ${borderColor};">
                 <div class="text-center">
-                    <h2 class="text-3xl font-dongle font-bold <span class="math-inline">\{currentTheme\.titleClass\} leading\-tight"\></span>{data.recipeName}</h2>
+                    <h2 class="text-3xl font-dongle font-bold ${currentTheme.titleClass} leading-tight">${data.recipeName}</h2>
                     <p class="text-lg ${currentTheme.subTitleClass} mt-1 font-gowun">✨ 우정을 위한 특별한 레시피 ✨</p>
                     <div class="flex justify-between items-center text-md ${currentTheme.toFromClass} mt-2 mb-3">
-                        <span class="bg-opacity-50 px-3 py-1 rounded-full text-xs ${currentTheme.sectionBgClass}"><span class="font-semibold">To.</span> <span class="font-bold <span class="math-inline">\{currentTheme\.toNameClass\}"\></span>{data.friendName}</span></span>
-                        <span class="bg-opacity-50 px-3 py-1 rounded-full text-xs ${currentTheme.sectionBgClass}"><span class="font-semibold">From.</span> <span class="font-bold <span class="math-inline">\{currentTheme\.fromNameClass\}"\></span>{data.senderName}</span></span>
+                        <span class="bg-opacity-50 px-3 py-1 rounded-full text-xs ${currentTheme.sectionBgClass}"><span class="font-semibold">To.</span> <span class="font-bold ${currentTheme.toNameClass}">${data.friendName}</span></span>
+                        <span class="bg-opacity-50 px-3 py-1 rounded-full text-xs ${currentTheme.sectionBgClass}"><span class="font-semibold">From.</span> <span class="font-bold ${currentTheme.fromNameClass}">${data.senderName}</span></span>
                     </div>
                 </div>
                 <div class="flex-1 flex gap-4 overflow-hidden" style="max-height: 190px;">
                     <div class="flex-1 space-y-3 overflow-y-auto pr-1">
                         <div class="${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm">
                             <h3 class="text-xl font-dongle font-bold ${currentTheme.ingTitleClass} mb-2 flex items-center"><span class="mr-1">⭐</span> 우정 재료</h3>
-                            <ul class="space-y-1 text-sm <span class="math-inline">\{currentTheme\.toFromClass\}"\></span>{ingredientsHtml}</ul>
+                            <ul class="space-y-1 text-sm ${currentTheme.toFromClass}">${ingredientsHtml}</ul>
                         </div>
-                        <span class="math-inline">\{imageHtml\}
-</div\>
-<div class\="flex\-1"\>
-<div class\="</span>{currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm h-full overflow-y-auto">
-                            <h3 class="text-xl font-dongle font-bold <span class="math-inline">\{currentTheme\.instTitleClass\} mb\-2 flex items\-center"\><span class\="mr\-1"\>🍳</span\> 만드는 방법</h3\>
-<p class\="</span>{instClasses} <span class="math-inline">\{currentTheme\.toFromClass\}"\></span>{data.instructions}</p>
+                        ${imageHtml}
+                    </div>
+                    <div class="flex-1">
+                        <div class="${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm h-full overflow-y-auto">
+                            <h3 class="text-xl font-dongle font-bold ${currentTheme.instTitleClass} mb-2 flex items-center"><span class="mr-1">🍳</span> 만드는 방법</h3>
+                            <p class="${instClasses} ${currentTheme.toFromClass}">${data.instructions}</p>
                         </div>
                     </div>
                 </div>
@@ -298,25 +293,22 @@
                 if (typeof html2canvas === 'undefined') throw new Error('html2canvas 라이브러리가 로드되지 않았습니다.');
                 if (typeof jsPDF === 'undefined') throw new Error('jsPDF 라이브러리가 로드되지 않았습니다.');
                 
-                if (!lastCardData) { // 미리보기를 누르지 않고 바로 PDF 저장 시도
+                if (!lastCardData) {
                     lastCardData = getCurrentFormData();
-                    // PDF 생성용 카드를 recipeCardWrapper에 그려야 html2canvas가 인식 가능
                     recipeCardWrapper.innerHTML = generateCardHTML(lastCardData);
                 } else {
-                    // 이미 lastCardData가 있고, recipeCardWrapper에 내용이 있을 수 있음.
-                    // 혹시 모달이 닫혔거나 내용이 없을 수 있으므로, 안전하게 다시 그림
                     recipeCardWrapper.innerHTML = generateCardHTML(lastCardData);
                 }
                 
                 const cardToCapture = recipeCardWrapper.querySelector('#recipeCard');
                 if (!cardToCapture) throw new Error("미리보기 후 PDF 저장을 시도해주세요 (카드 요소를 찾을 수 없음).");
                 
-                await new Promise(resolve => setTimeout(resolve, 500)); // DOM 렌더링 대기
+                await new Promise(resolve => setTimeout(resolve, 500));
 
                 const canvas = await html2canvas(cardToCapture, { scale: 2.5, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 const imgData = canvas.toDataURL('image/png', 0.92);
                 
-                const doc = new jsPDF('l', 'mm', [148, 105]); // A6 가로
+                const doc = new jsPDF('l', 'mm', [148, 105]);
                 doc.addImage(imgData, 'PNG', 0, 0, 148, 105, undefined, 'FAST');
                 const fileName = `${(lastCardData.recipeName || '우정레시피카드').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ一-龠ぁ-ゔァ-ヴー]/g, '_')}.pdf`;
                 doc.save(fileName);
@@ -354,13 +346,12 @@
             }
 
             const baseUrl = window.location.origin + window.location.pathname;
-            const shareUrl = `<span class="math-inline">\{baseUrl\}?</span>{params.toString()}`;
+            const shareUrl = `${baseUrl}?${params.toString()}`;
             
             shareableLinkRecipeInput.value = shareUrl;
             shareLinkRecipeContainer.classList.remove('hidden');
             copyFeedbackRecipe.classList.add('hidden');
 
-            // 사용자가 요청한 새 창으로 공유 링크 열기 기능
             if (confirm("생성된 공유 링크를 새 탭에서 열어 확인하시겠습니까?")) {
                 window.open(shareUrl, '_blank');
             }
@@ -406,7 +397,6 @@
                 recipeCardWrapperShared.style.height = '400px';
                 recipeCardWrapperShared.innerHTML = generateCardHTML(sharedData);
                 sharedCardDisplayArea.classList.remove('hidden');
-                sharedCardDisplayArea.style.flexDirection = 'column'; // 버튼을 카드 아래로 보내기 위함
 
                 printSharedCardBtn.onclick = async () => {
                     printSharedCardBtn.innerText = 'PDF 생성 중...';
@@ -414,7 +404,7 @@
                     const cardToPrint = recipeCardWrapperShared.querySelector('#recipeCard');
                     if (cardToPrint) {
                         try {
-                            const canvas = await html2canvas(cardToPrint, { scale: 2.5, useCORS: true, logging: false, backgroundColor: '#ffffff' }); // 공유 카드 배경 흰색으로
+                            const canvas = await html2canvas(cardToPrint, { scale: 2.5, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                             const imgData = canvas.toDataURL('image/png', 0.92);
                             const doc = new jsPDF('l', 'mm', [148, 105]);
                             doc.addImage(imgData, 'PNG', 0, 0, 148, 105);
@@ -433,8 +423,8 @@
                         printSharedCardBtn.disabled = false;
                     }
                 };
-            } else { // 일반 모드
-                imageUploadWarning.classList.remove('hidden'); // 일반 모드에서만 이미지 크기 경고 표시
+            } else {
+                imageUploadWarning.classList.remove('hidden');
             }
         }
         loadSharedCard();
