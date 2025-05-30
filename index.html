@@ -21,13 +21,16 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         #sharedCardDisplayArea {
-            display: flex;
+            display: none; /* 기본적으로 완전히 숨김 */
             flex-direction: column; 
             align-items: center;
             justify-content: center;
             width: 100%;
             min-height: 100vh; 
             padding: 1rem;
+        }
+        #sharedCardDisplayArea.show {
+            display: flex; /* 공유 모드일 때만 표시 */
         }
         #recipeCardWrapper, #recipeCardWrapperShared {
             width: 560px; 
@@ -133,7 +136,7 @@
         </div>
     </div>
 
-    <div id="sharedCardDisplayArea" class="hidden w-full">
+    <div id="sharedCardDisplayArea" class="w-full">
         <div id="recipeCardWrapperShared" class="mx-auto">
             <!-- 공유된 카드가 여기에 표시됩니다 -->
         </div>
@@ -431,13 +434,16 @@
                     date: decodeURIComponent(params.get('date'))
                 };
 
-                mainContentDiv.classList.add('hidden');
+                // 메인 폼 완전히 숨기기
+                mainContentDiv.style.display = 'none';
                 previewModal.classList.add('hidden');
                 
                 recipeCardWrapperShared.style.width = '560px';
                 recipeCardWrapperShared.style.height = '400px';
                 recipeCardWrapperShared.innerHTML = generateCardHTML(sharedData);
-                sharedCardDisplayArea.classList.remove('hidden');
+                
+                // 공유 영역 표시
+                sharedCardDisplayArea.classList.add('show');
 
                 printSharedCardBtn.onclick = async () => {
                     printSharedCardBtn.innerText = 'PDF 생성 중...';
@@ -465,6 +471,10 @@
                     }
                 };
             } else { 
+                // 일반 모드: 공유 영역 확실히 숨기기
+                sharedCardDisplayArea.classList.remove('show');
+                sharedCardDisplayArea.style.display = 'none';
+                mainContentDiv.style.display = 'block';
                 imageUploadOverallWarning.classList.remove('hidden');
             }
         }
