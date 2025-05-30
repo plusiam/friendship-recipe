@@ -117,24 +117,25 @@
     </div>
 
     <div id="previewModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 transition-opacity duration-300 no-print">
-        <div class="bg-white p-4 rounded-xl shadow-2xl relative max-w-4xl w-auto"> {/* w-full 대신 w-auto로 변경 */}
+        <div class="bg-white p-4 rounded-xl shadow-2xl relative max-w-4xl w-auto">
             <button id="closeModalBtn" class="absolute -top-3 -right-3 bg-white rounded-full p-1 shadow-lg w-8 h-8 flex items-center justify-center text-xl font-bold text-gray-700 hover:text-red-500">&times;</button>
-            <div id="recipeCardWrapper"> {/* 여기에 카드 내용이 동적으로 삽입됨 */}
+            <div id="recipeCardWrapper">
+                <!-- 카드 미리보기가 여기에 표시됩니다 -->
             </div>
         </div>
     </div>
 
     <div id="sharedCardDisplayArea" class="hidden w-full">
-        <div id="recipeCardWrapperShared" class="mx-auto"> 
-             {/* 여기에 공유된 카드 내용이 동적으로 삽입됨, recipeCardWrapper와 동일한 크기 유지 */}
+        <div id="recipeCardWrapperShared" class="mx-auto">
+            <!-- 공유된 카드가 여기에 표시됩니다 -->
         </div>
-         <button id="printSharedCardBtn" class="block mx-auto mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition no-print">이 카드 인쇄하기 🖨️</button>
+        <button id="printSharedCardBtn" class="block mx-auto mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition no-print">이 카드 인쇄하기 🖨️</button>
     </div>
     
     <script>
         const { jsPDF } = window.jspdf;
         const form = document.getElementById('recipeForm');
-        const mainContentDiv = document.getElementById('mainContent'); // 메인 입력폼 영역
+        const mainContentDiv = document.getElementById('mainContent');
         const addIngredientBtn = document.getElementById('addIngredientBtn');
         const ingredientsContainer = document.getElementById('ingredients-container');
         const imageUpload = document.getElementById('imageUpload');
@@ -151,17 +152,16 @@
 
         const previewModal = document.getElementById('previewModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
-        const recipeCardWrapper = document.getElementById('recipeCardWrapper'); // 모달 내 카드 래퍼
+        const recipeCardWrapper = document.getElementById('recipeCardWrapper');
         
-        const sharedCardDisplayArea = document.getElementById('sharedCardDisplayArea'); // 공유 시 카드 표시 영역
-        const recipeCardWrapperShared = document.getElementById('recipeCardWrapperShared'); // 공유 시 카드 래퍼
+        const sharedCardDisplayArea = document.getElementById('sharedCardDisplayArea');
+        const recipeCardWrapperShared = document.getElementById('recipeCardWrapperShared');
         const printSharedCardBtn = document.getElementById('printSharedCardBtn');
 
-
         let uploadedImageSrc = '';
-        let lastCardData = null; // PDF 및 공유 링크 생성 시 사용할 데이터
+        let lastCardData = null;
 
-        const themes = { /* ... 이전 테마 정의와 동일 ... */ 
+        const themes = {
             pastel: { cardClass: "bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-100", titleClass: "text-sky-700", subTitleClass: "text-pink-500", toFromClass: "text-gray-700", toNameClass: "text-pink-600", fromNameClass: "text-blue-600", sectionBgClass: "bg-white/60", ingTitleClass: "text-yellow-600", instTitleClass: "text-lime-600", footerClass: "text-gray-500", footerBgClass: "bg-white/60" },
             green: { cardClass: "bg-gradient-to-br from-green-100 to-lime-200", titleClass: "text-green-800", subTitleClass: "text-green-600", toFromClass: "text-gray-700", toNameClass: "text-emerald-600", fromNameClass: "text-teal-600", sectionBgClass: "bg-white/70", ingTitleClass: "text-yellow-700", instTitleClass: "text-green-700", footerClass: "text-gray-600", footerBgClass: "bg-white/70" },
             orange: { cardClass: "bg-gradient-to-br from-orange-100 to-amber-200", titleClass: "text-orange-800", subTitleClass: "text-red-500", toFromClass: "text-gray-700", toNameClass: "text-red-600", fromNameClass: "text-yellow-700", sectionBgClass: "bg-white/70", ingTitleClass: "text-amber-700", instTitleClass: "text-orange-700", footerClass: "text-gray-600", footerBgClass: "bg-white/70" },
@@ -169,7 +169,7 @@
         };
 
         function generateCardHTML(data, theme, forPDF = false) {
-            const currentTheme = themes[theme.themeName] || themes.pastel;
+            const currentTheme = themes[data.themeName] || themes.pastel;
             const creationDate = data.date || new Date().toLocaleDateString('ko-KR');
 
             let ingredientsHtml = data.ingredients && data.ingredients.length > 0
@@ -184,18 +184,11 @@
             const imageHtml = data.imageSrc ? 
                  `<div class="mt-4 ${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm">
                      <h3 class="text-lg font-dongle font-bold ${currentTheme.toNameClass} mb-2 flex items-center"><span class="mr-1">📸</span> 추억 한 장</h3>
-                     <img src="${data.imageSrc}" class="rounded-md shadow-sm w-full h-20 object-cover"/>
+                     <img src="${data.imageSrc}" class="rounded-md shadow-sm w-full max-h-24 object-contain"/>
                   </div>` : '';
             
-            // 카드 배경 스타일 직접 설정 (Tailwind 클래스로 그라데이션 표현 어려움)
-            const cardStyle = currentTheme.cardClass.includes('gradient') 
-                ? `background: ${currentTheme.cardClass.split(' ').find(c => c.startsWith('from-') || c.startsWith('to-') || c.startsWith('via-')) ? currentTheme.cardClass.match(/from-[-a-z0-9]+ via-[-a-z0-9]+ to-[-a-z0-9]+/)[0].replace(/from-/g, 'var(--tw-gradient-from, transparent), ').replace(/via-/g, 'var(--tw-gradient-stops, transparent), ').replace(/to-/g, 'var(--tw-gradient-to, transparent)') : currentTheme.cardClass}; background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));`
-                : `background-color: var(--${currentTheme.cardClass.replace('bg-','').replace('-800','')}-color);`; // 네이비 같은 단색 처리
-            
-            // Tailwind 클래스로는 그라데이션 적용이 까다로워, 주요 배경 클래스만 남기고 style 속성으로 그라데이션 직접 적용 시도
             let cardBaseClasses = "font-gowun p-4 rounded-xl shadow-lg w-full h-full flex flex-col justify-between";
             if (data.themeName === 'navy') cardBaseClasses += " text-white";
-
 
             return `
             <div id="recipeCard" class="${cardBaseClasses} ${currentTheme.cardClass}" style="border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 3px dashed ${data.themeName === 'navy' ? '#4b5563' : 'white'};">
@@ -207,7 +200,7 @@
                         <span class="bg-opacity-50 px-3 py-1 rounded-full text-xs ${currentTheme.sectionBgClass}"><span class="font-semibold">From.</span> <span class="font-bold ${currentTheme.fromNameClass}">${data.senderName}</span></span>
                     </div>
                 </div>
-                <div class="flex-1 flex gap-4 overflow-hidden" style="max-height: 190px;"> {/* 내용 영역 높이 제한 */}
+                <div class="flex-1 flex gap-4 overflow-hidden" style="max-height: 190px;">
                     <div class="flex-1 space-y-3 overflow-y-auto pr-1">
                         <div class="${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm">
                             <h3 class="text-xl font-dongle font-bold ${currentTheme.ingTitleClass} mb-2 flex items-center"><span class="mr-1">⭐</span> 우정 재료</h3>
@@ -243,7 +236,7 @@
             };
         }
 
-        addIngredientBtn.addEventListener('click', () => { /* ... 이전과 동일 ... */ 
+        addIngredientBtn.addEventListener('click', () => {
             const ingredientDiv = document.createElement('div');
             ingredientDiv.className = 'flex items-center space-x-2';
             const newInput = document.createElement('input');
@@ -264,7 +257,7 @@
             if (event.target.files && event.target.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    uploadedImageSrc = e.target.result; // Base64 string
+                    uploadedImageSrc = e.target.result;
                     imagePreview.src = uploadedImageSrc;
                     imagePreviewContainer.classList.remove('hidden');
                 };
@@ -280,53 +273,89 @@
             lastCardData = getCurrentFormData();
             recipeCardWrapper.innerHTML = generateCardHTML(lastCardData, {themeName: lastCardData.themeName});
             previewModal.classList.remove('hidden');
-            createShareLinkBtnRecipe.classList.remove('hidden'); // 미리보기 후 공유 버튼 표시
+            createShareLinkBtnRecipe.classList.remove('hidden');
         });
 
         closeModalBtn.addEventListener('click', () => previewModal.classList.add('hidden'));
 
-        generatePdfBtn.addEventListener('click', async () => { /* ... 이전과 동일, 단 cardToCapture는 #recipeCard ... */
+        generatePdfBtn.addEventListener('click', async () => {
+            console.log('PDF 생성 시작...');
             generatePdfBtn.innerText = 'PDF 만드는 중...';
             generatePdfBtn.disabled = true;
             
-            // PDF 생성 전, 카드가 DOM에 그려져야 하므로 미리보기 로직을 한 번 더 호출하거나,
-            // 미리보기 시 생성된 카드를 사용합니다. 여기서는 미리보기와 동일한 데이터를 사용.
-            if (!lastCardData) { // 미리보기를 누르지 않았을 경우 현재 폼 데이터 사용
-                lastCardData = getCurrentFormData();
-            }
-            // PDF 생성용 카드를 임시로 한번 더 그리거나, 모달 안의 것을 사용.
-            // 여기서는 모달이 아닌 별도 영역에 그리지 않고, 현재 DOM(모달 내)의 카드를 사용한다고 가정.
-            // 만약 모달이 닫혀있다면 문제가 될 수 있으므로, applyThemeAndContent와 유사한 로직으로
-            // 보이지 않는 곳에 카드를 그리거나, 모달을 잠시 열고 캡처 후 닫는 방법 등이 필요.
-            // 가장 간단한 방법은 미리보기를 통해 recipeCardWrapper에 내용이 채워져 있다고 가정.
-            // 또는 PDF 생성 직전에 recipeCardWrapper에 내용을 채워넣음.
-            
-            recipeCardWrapper.innerHTML = generateCardHTML(lastCardData, {themeName: lastCardData.themeName}, true); // PDF용으로 다시 그림
-            
-            const cardToCapture = recipeCardWrapper.querySelector('#recipeCard'); // recipeCardWrapper 안의 #recipeCard
-            
-            if(!cardToCapture) {
-                console.error("Card element for PDF generation not found!");
-                generatePdfBtn.innerText = 'PDF로 저장하기 💌';
-                generatePdfBtn.disabled = false;
-                return;
-            }
-
-            await new Promise(resolve => setTimeout(resolve, 500)); // DOM 업데이트 시간 확보
-            
             try {
-                const canvas = await html2canvas(cardToCapture, { scale: 2.5, useCORS: true, logging: false, backgroundColor: null });
-                const imgData = canvas.toDataURL('image/png', 0.95); // 품질 약간 조정
+                // 라이브러리 확인
+                if (typeof html2canvas === 'undefined') {
+                    throw new Error('html2canvas 라이브러리가 로드되지 않았습니다.');
+                }
+                if (typeof jsPDF === 'undefined') {
+                    throw new Error('jsPDF 라이브러리가 로드되지 않았습니다.');
+                }
                 
-                const doc = new jsPDF('l', 'mm', [148, 105]); // A6 가로: 148mm x 105mm
-                doc.addImage(imgData, 'PNG', 0, 0, 148, 105, undefined, 'FAST');
-                doc.save(`${(lastCardData.recipeName || '우정레시피카드').replace(/\s+/g, '_')}.pdf`);
+                if (!lastCardData) {
+                    lastCardData = getCurrentFormData();
+                    console.log('현재 폼 데이터 사용:', lastCardData);
+                }
+                
+                // 먼저 미리보기 모달을 열어서 카드를 DOM에 렌더링
+                recipeCardWrapper.innerHTML = generateCardHTML(lastCardData, {themeName: lastCardData.themeName}, true);
+                
+                const cardToCapture = recipeCardWrapper.querySelector('#recipeCard');
+                
+                if (!cardToCapture) {
+                    throw new Error('카드 요소를 찾을 수 없습니다.');
+                }
+                
+                console.log('카드 요소 찾음, html2canvas 시작...');
+                
+                // DOM 업데이트 대기 시간 증가
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // html2canvas 옵션 단순화
+                const canvas = await html2canvas(cardToCapture, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: false,
+                    logging: true,
+                    backgroundColor: '#ffffff'
+                });
+                
+                console.log('Canvas 생성 완료:', canvas.width, 'x', canvas.height);
+                
+                const imgData = canvas.toDataURL('image/png', 0.9);
+                console.log('이미지 데이터 생성 완료');
+                
+                const doc = new jsPDF('l', 'mm', [148, 105]);
+                doc.addImage(imgData, 'PNG', 0, 0, 148, 105);
+                
+                const fileName = `${(lastCardData.recipeName || '우정레시피카드').replace(/[^\w가-힣]/g, '_')}.pdf`;
+                console.log('PDF 저장:', fileName);
+                
+                doc.save(fileName);
+                console.log('PDF 생성 완료!');
+                
+                // 성공 메시지
+                alert('PDF가 성공적으로 생성되었습니다! 📄');
+                
             } catch (error) {
-                console.error("PDF 생성 중 오류:", error);
-                alert("PDF 생성 중 오류가 발생했습니다. 작은 이미지를 사용하거나 다시 시도해주세요.");
+                console.error("PDF 생성 중 상세 오류:", error);
+                let errorMessage = "PDF 생성 중 오류가 발생했습니다.\n\n";
+                
+                if (error.message.includes('html2canvas')) {
+                    errorMessage += "• html2canvas 라이브러리 문제\n• 페이지를 새로고침 후 다시 시도해주세요.";
+                } else if (error.message.includes('jsPDF')) {
+                    errorMessage += "• jsPDF 라이브러리 문제\n• 페이지를 새로고침 후 다시 시도해주세요.";
+                } else if (error.message.includes('카드 요소')) {
+                    errorMessage += "• 먼저 '미리보기' 버튼을 눌러주세요.";
+                } else {
+                    errorMessage += "• 이미지가 너무 클 수 있습니다. 작은 이미지를 사용해보세요.\n• 브라우저를 새로고침 후 다시 시도해주세요.";
+                }
+                
+                alert(errorMessage);
             } finally {
                 generatePdfBtn.innerText = 'PDF로 저장하기 💌';
                 generatePdfBtn.disabled = false;
+                console.log('PDF 생성 프로세스 종료');
             }
         });
 
@@ -336,16 +365,15 @@
                 return;
             }
             const params = new URLSearchParams();
-            params.append('v', '1'); // 버전 관리용 (선택적)
+            params.append('v', '1');
             params.append('theme', encodeURIComponent(lastCardData.themeName));
             params.append('recipeName', encodeURIComponent(lastCardData.recipeName));
             params.append('friendName', encodeURIComponent(lastCardData.friendName));
             params.append('senderName', encodeURIComponent(lastCardData.senderName));
             params.append('instructions', encodeURIComponent(lastCardData.instructions));
-            params.append('ingredients', encodeURIComponent(JSON.stringify(lastCardData.ingredients))); // 배열은 JSON 문자열로
+            params.append('ingredients', encodeURIComponent(JSON.stringify(lastCardData.ingredients)));
             params.append('date', encodeURIComponent(lastCardData.date));
             if (lastCardData.imageSrc) {
-                // 이미지 데이터가 매우 길 수 있음을 인지
                 params.append('imageSrc', encodeURIComponent(lastCardData.imageSrc)); 
             }
 
@@ -380,28 +408,27 @@
         // 페이지 로드 시 URL 파라미터 확인 및 공유 모드 처리
         function loadSharedCard() {
             const params = new URLSearchParams(window.location.search);
-            if (params.has('recipeName') && params.get('v') === '1') { // 주요 파라미터 및 버전 확인
+            if (params.has('recipeName') && params.get('v') === '1') {
                 const sharedData = {
                     themeName: decodeURIComponent(params.get('theme') || 'pastel'),
                     recipeName: decodeURIComponent(params.get('recipeName')),
                     friendName: decodeURIComponent(params.get('friendName')),
                     senderName: decodeURIComponent(params.get('senderName')),
                     instructions: decodeURIComponent(params.get('instructions')),
-                    ingredients: JSON.parse(decodeURIComponent(params.get('ingredients') || '[]')), // 배열 복원
+                    ingredients: JSON.parse(decodeURIComponent(params.get('ingredients') || '[]')),
                     imageSrc: params.has('imageSrc') ? decodeURIComponent(params.get('imageSrc')) : '',
                     date: decodeURIComponent(params.get('date'))
                 };
 
-                mainContentDiv.classList.add('hidden'); // 메인 입력 폼 숨기기
-                previewModal.classList.add('hidden'); // 혹시 열려있을 수 있는 모달 숨기기
+                mainContentDiv.classList.add('hidden');
+                previewModal.classList.add('hidden');
                 
-                // recipeCardWrapperShared의 크기를 recipeCardWrapper와 동일하게 설정
                 recipeCardWrapperShared.style.width = '560px';
                 recipeCardWrapperShared.style.height = '400px';
                 recipeCardWrapperShared.innerHTML = generateCardHTML(sharedData, {themeName: sharedData.themeName});
                 sharedCardDisplayArea.classList.remove('hidden');
 
-                printSharedCardBtn.onclick = async () => { // 공유된 카드 인쇄 버튼 로직
+                printSharedCardBtn.onclick = async () => {
                     printSharedCardBtn.innerText = '인쇄 준비 중...';
                     printSharedCardBtn.disabled = true;
                     const cardToPrint = recipeCardWrapperShared.querySelector('#recipeCard');
@@ -410,7 +437,7 @@
                             const canvas = await html2canvas(cardToPrint, { scale: 2.5, useCORS: true, logging: false, backgroundColor: null });
                             const imgData = canvas.toDataURL('image/png', 0.95);
                             const doc = new jsPDF('l', 'mm', [148, 105]);
-                            doc.addImage(imgData, 'PNG', 0, 0, 148, 105, undefined, 'FAST');
+                            doc.addImage(imgData, 'PNG', 0, 0, 148, 105);
                             doc.save(`${(sharedData.recipeName || '우정레시피카드').replace(/\s+/g, '_')}_shared.pdf`);
                         } catch (error) {
                             console.error("공유 카드 PDF 생성 중 오류:", error);
@@ -426,13 +453,14 @@
                     }
                 };
 
-
             } else {
-                // 일반 모드: 이미지 업로드 주의 문구 표시
-                document.querySelector('#imageUpload + .text-xs.text-orange-600').classList.remove('hidden');
+                const warningElement = document.querySelector('#imageUpload + .text-xs.text-orange-600');
+                if (warningElement) {
+                    warningElement.classList.remove('hidden');
+                }
             }
         }
-        loadSharedCard(); // 페이지 로드 시 실행
+        loadSharedCard();
 
     </script>
 </body>
