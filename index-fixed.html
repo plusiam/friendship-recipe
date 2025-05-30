@@ -16,11 +16,18 @@
             box-sizing: border-box;
         }
         
+        html {
+            height: 100%;
+        }
+        
         body {
             font-family: 'Gowun Dodum', -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
             line-height: 1.6;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            background-attachment: fixed;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
         }
         
         .font-title {
@@ -31,31 +38,44 @@
         /* 메인 컨테이너 */
         .main-container {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
+            width: 100%;
         }
         
         .content-wrapper {
             width: 100%;
             max-width: 1000px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
             border-radius: 25px;
             padding: 40px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.25);
             border: 1px solid rgba(255, 255, 255, 0.3);
+            margin: 20px 0;
         }
         
         /* 헤더 스타일 */
         .header {
             text-align: center;
-            border-bottom: 2px solid transparent;
-            background: linear-gradient(90deg, #ff6b95, #667eea) padding-box, 
-                        linear-gradient(90deg, #ff6b95, #667eea) border-box;
             padding-bottom: 30px;
             margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff6b95, #667eea, transparent);
+            border-radius: 2px;
         }
         
         .main-title {
@@ -68,6 +88,7 @@
             color: transparent;
             margin-bottom: 15px;
             animation: titleFloat 3s ease-in-out infinite;
+            text-shadow: none;
         }
         
         @keyframes titleFloat {
@@ -79,6 +100,7 @@
             color: #666;
             font-size: 1.2rem;
             margin-bottom: 20px;
+            font-weight: 500;
         }
         
         .feature-badge {
@@ -89,13 +111,15 @@
             font-weight: bold;
             box-shadow: 0 8px 25px rgba(255, 107, 149, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.3);
+            display: inline-block;
+            margin: 10px 0;
         }
         
         /* 섹션 스타일 */
         .section {
             margin: 35px 0;
             padding: 30px;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             border: 2px solid rgba(255, 255, 255, 0.3);
@@ -218,7 +242,7 @@
             font-size: 1.1rem;
             margin-bottom: 20px;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(5px);
         }
         
@@ -479,6 +503,81 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
         
+        /* 카드 내 이미지 스타일 개선 */
+        .card-image-section {
+            padding: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            min-height: auto;
+        }
+        
+        .card-image-section h3 {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        .card-image-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
+        }
+        
+        .card-image-section img {
+            max-width: 100%;
+            max-height: 200px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 3px solid rgba(255,255,255,0.6);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            display: block;
+        }
+        
+        /* 메인 컨텐츠 그리드 개선 */
+        .card-main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 25px 0;
+            flex: 1;
+            align-items: start;
+        }
+        
+        /* 카드 섹션들의 높이 자동 조정 */
+        .card-section {
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: auto;
+        }
+        
+        .card-section.ingredients-section {
+            min-height: 200px;
+        }
+        
+        .card-section.instructions-section {
+            min-height: 200px;
+        }
+        
         /* 모달 스타일 */
         .modal {
             display: none;
@@ -668,13 +767,23 @@
         
         /* 반응형 디자인 */
         @media (max-width: 768px) {
+            .main-container {
+                padding: 15px;
+            }
+            
             .content-wrapper {
                 padding: 25px;
-                margin: 10px;
+                margin: 10px 0;
+                border-radius: 20px;
             }
             
             .main-title {
                 font-size: 2.5rem;
+            }
+            
+            .feature-badge {
+                padding: 12px 20px;
+                font-size: 0.9rem;
             }
             
             .theme-grid {
@@ -714,9 +823,39 @@
                 padding: 25px;
                 margin: 10px;
             }
+            
+            .section {
+                padding: 20px;
+                margin: 25px 0;
+            }
+            
+            .card-image-section {
+                padding: 15px;
+                margin-top: 15px;
+            }
+            
+            .card-image-section img {
+                max-height: 150px;
+            }
+            
+            /* 모바일에서 세로 레이아웃 조정 */
+            .card-main-content > div:last-child {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
         }
         
         @media (max-width: 480px) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            .content-wrapper {
+                padding: 20px;
+                border-radius: 15px;
+            }
+            
             .theme-grid {
                 grid-template-columns: 1fr;
             }
@@ -727,6 +866,40 @@
             
             .card-title {
                 font-size: 1.8rem;
+            }
+            
+            .section-title {
+                font-size: 1.4rem;
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+            
+            .feature-badge {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .card-image-section {
+                padding: 12px;
+            }
+            
+            .card-image-section h3 {
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+            }
+            
+            .card-image-section img {
+                max-height: 120px;
+                border-radius: 8px;
+            }
+            
+            .card-preview {
+                padding: 15px;
+            }
+            
+            .card-section {
+                padding: 20px;
             }
         }
     </style>
@@ -869,10 +1042,19 @@
                 <div id="errorHelp" class="section hidden" style="background: linear-gradient(135deg, #fef2f2, #fee2e2); border-color: #fecaca;">
                     <h3 style="color: #dc2626; margin-bottom: 15px;">⚠️ PDF 생성이 안 될 때 해결 방법</h3>
                     <div style="color: #7f1d1d; line-height: 1.8;">
-                        <p><strong>방법 1:</strong> 브라우저 새로고침 후 다시 시도</p>
-                        <p><strong>방법 2:</strong> 이미지 없이 텍스트만으로 다시 시도</p>
+                        <p><strong>🔧 즉시 해결 방법:</strong></p>
+                        <p><strong>1단계:</strong> "미리보기" 버튼 먼저 클릭</p>
+                        <p><strong>2단계:</strong> 미리보기가 완전히 로딩된 후 "PDF 저장" 클릭</p>
+                        <p><strong>3단계:</strong> 그래도 안 되면 "수동 저장 가이드" 이용</p>
+                        <br>
+                        <p><strong>🛠️ 추가 해결 방법:</strong></p>
+                        <p><strong>방법 1:</strong> 이미지를 제거하고 텍스트만으로 다시 시도</p>
+                        <p><strong>방법 2:</strong> 브라우저 새로고침 후 다시 시도</p>
                         <p><strong>방법 3:</strong> 다른 브라우저(Chrome, Firefox 등)에서 시도</p>
-                        <p><strong>방법 4:</strong> "수동 저장 가이드" 버튼으로 화면 캡처 사용</p>
+                        <p><strong>방법 4:</strong> "수동 저장 가이드"로 화면 캡처 사용</p>
+                    </div>
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 10px;">
+                        <p style="color: #1e40af; font-weight: bold;">💡 팁: 미리보기를 먼저 열고 완전히 로딩된 후 PDF 생성하면 성공률이 높아집니다!</p>
                     </div>
                 </div>
             </form>
@@ -1050,12 +1232,54 @@
 
             const theme = themes[data.theme];
             const ingredientsHtml = data.ingredients.map(ing => `<li>✨ ${ing}</li>`).join('');
-            const imageHtml = data.image ? `
-                <div class="card-section" style="background: ${theme.sectionBg}; margin-top: 20px;">
-                    <h3 style="color: ${theme.textColor};">📸 소중한 추억</h3>
-                    <img src="${data.image}" style="width: 100%; max-height: 140px; object-fit: cover; border-radius: 15px; border: 3px solid rgba(255,255,255,0.5); box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
-                </div>
-            ` : '';
+            
+            // 이미지가 있는 경우와 없는 경우에 따른 레이아웃 조정
+            let leftColumnContent = '';
+            let rightColumnContent = '';
+            
+            if (data.image) {
+                // 이미지가 있는 경우: 왼쪽에 재료, 오른쪽에 만드는 방법과 이미지
+                leftColumnContent = `
+                    <div class="card-section ingredients-section" style="background: ${theme.sectionBg};">
+                        <h3 style="color: ${theme.textColor};">⭐ 우정 재료</h3>
+                        <ul class="ingredients-list" style="color: ${theme.textColor};">
+                            ${ingredientsHtml}
+                        </ul>
+                    </div>
+                `;
+                
+                rightColumnContent = `
+                    <div style="display: flex; flex-direction: column; gap: 20px; height: 100%;">
+                        <div class="card-section instructions-section" style="background: ${theme.sectionBg}; flex: 1;">
+                            <h3 style="color: ${theme.textColor};">🍳 만드는 방법</h3>
+                            <div class="instructions-text" style="color: ${theme.textColor}; flex: 1;">${data.instructions}</div>
+                        </div>
+                        <div class="card-image-section" style="background: ${theme.sectionBg};">
+                            <h3 style="color: ${theme.textColor};">📸 소중한 추억</h3>
+                            <div class="card-image-container">
+                                <img src="${data.image}" alt="추억 사진">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // 이미지가 없는 경우: 기존 레이아웃 유지
+                leftColumnContent = `
+                    <div class="card-section ingredients-section" style="background: ${theme.sectionBg};">
+                        <h3 style="color: ${theme.textColor};">⭐ 우정 재료</h3>
+                        <ul class="ingredients-list" style="color: ${theme.textColor};">
+                            ${ingredientsHtml}
+                        </ul>
+                    </div>
+                `;
+                
+                rightColumnContent = `
+                    <div class="card-section instructions-section" style="background: ${theme.sectionBg}; height: 100%; display: flex; flex-direction: column;">
+                        <h3 style="color: ${theme.textColor};">🍳 만드는 방법</h3>
+                        <div class="instructions-text" style="color: ${theme.textColor}; flex: 1;">${data.instructions}</div>
+                    </div>
+                `;
+            }
 
             return `
                 <div class="card-preview ${theme.cardClass}" id="recipeCard">
@@ -1075,21 +1299,8 @@
                         </div>
                         
                         <div class="card-main-content">
-                            <div>
-                                <div class="card-section" style="background: ${theme.sectionBg};">
-                                    <h3 style="color: ${theme.textColor};">⭐ 우정 재료</h3>
-                                    <ul class="ingredients-list" style="color: ${theme.textColor};">
-                                        ${ingredientsHtml}
-                                    </ul>
-                                </div>
-                                ${imageHtml}
-                            </div>
-                            <div>
-                                <div class="card-section" style="background: ${theme.sectionBg}; min-height: 100%; display: flex; flex-direction: column;">
-                                    <h3 style="color: ${theme.textColor};">🍳 만드는 방법</h3>
-                                    <div class="instructions-text" style="color: ${theme.textColor}; flex: 1;">${data.instructions}</div>
-                                </div>
-                            </div>
+                            <div>${leftColumnContent}</div>
+                            <div>${rightColumnContent}</div>
                         </div>
                         
                         <div class="card-footer">
@@ -1113,7 +1324,7 @@
             document.getElementById('previewModal').classList.remove('show');
         }
 
-        // PDF 생성 함수
+        // PDF 생성 함수 (완전히 새로운 접근법)
         async function generatePDF() {
             if (!librariesLoaded) {
                 const loaded = await checkLibraries();
@@ -1131,79 +1342,134 @@
             document.getElementById('loading').classList.add('show');
 
             try {
-                // 임시 카드 생성
-                const tempDiv = document.createElement('div');
-                tempDiv.style.position = 'absolute';
-                tempDiv.style.left = '-9999px';
-                tempDiv.style.top = '-9999px';
-                tempDiv.style.visibility = 'hidden';
-                tempDiv.innerHTML = generateCardHTML(currentCardData);
-                document.body.appendChild(tempDiv);
+                // 1단계: 미리보기 먼저 표시
+                if (!document.getElementById('previewModal').classList.contains('show')) {
+                    showPreview();
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                }
 
-                const cardElement = tempDiv.querySelector('#recipeCard');
+                // 2단계: 미리보기 모달의 카드 직접 캡처
+                const cardElement = document.querySelector('#cardPreviewContainer #recipeCard');
                 
-                // 렌더링 대기
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                if (!cardElement) {
+                    throw new Error('카드 요소를 찾을 수 없습니다.');
+                }
 
-                // 실제 크기 측정
-                const actualWidth = cardElement.offsetWidth;
-                const actualHeight = cardElement.offsetHeight;
+                // 3단계: 이미지 로딩 완료 대기
+                const images = cardElement.querySelectorAll('img');
+                if (images.length > 0) {
+                    await Promise.all(Array.from(images).map(img => {
+                        if (img.complete) return Promise.resolve();
+                        return new Promise(resolve => {
+                            img.onload = resolve;
+                            img.onerror = resolve; // 에러가 나도 계속 진행
+                        });
+                    }));
+                }
 
-                // html2canvas로 캡처
-                const canvas = await html2canvas(cardElement, {
-                    scale: 3,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    logging: false,
-                    width: actualWidth,
-                    height: actualHeight,
-                    scrollX: 0,
-                    scrollY: 0
+                // 4단계: 폰트 및 렌더링 완료 대기
+                await new Promise(resolve => {
+                    if (document.fonts && document.fonts.ready) {
+                        document.fonts.ready.then(() => {
+                            setTimeout(resolve, 1200);
+                        });
+                    } else {
+                        setTimeout(resolve, 1800);
+                    }
                 });
 
-                // PDF 생성
+                // 5단계: 카드 크기 동적 측정
+                const cardRect = cardElement.getBoundingClientRect();
+                const cardWidth = Math.max(560, cardRect.width);
+                const cardHeight = Math.max(400, cardRect.height);
+
+                // 6단계: 최소한의 옵션으로 캡처
+                const canvas = await html2canvas(cardElement, {
+                    scale: 2,
+                    useCORS: false,
+                    allowTaint: false,
+                    backgroundColor: 'white',
+                    logging: false,
+                    removeContainer: false,
+                    foreignObjectRendering: false,
+                    imageTimeout: 0,
+                    width: cardWidth,
+                    height: cardHeight,
+                    onclone: function(clonedDoc) {
+                        // 클론된 문서에서 위험한 요소들 제거
+                        const scripts = clonedDoc.querySelectorAll('script');
+                        scripts.forEach(script => script.remove());
+                        
+                        const iframes = clonedDoc.querySelectorAll('iframe');
+                        iframes.forEach(iframe => iframe.remove());
+                        
+                        // 이미지 요소들의 크기 보정
+                        const clonedImages = clonedDoc.querySelectorAll('.card-image-section img');
+                        clonedImages.forEach(img => {
+                            img.style.maxWidth = '100%';
+                            img.style.maxHeight = '200px';
+                            img.style.objectFit = 'contain';
+                        });
+                        
+                        return clonedDoc;
+                    }
+                });
+
+                // 7단계: PDF 생성 (A4 최적화)
                 const { jsPDF } = window.jspdf;
-                const imgData = canvas.toDataURL('image/png', 0.98);
+                const imgData = canvas.toDataURL('image/jpeg', 0.92);
                 
-                const canvasWidth = canvas.width;
-                const canvasHeight = canvas.height;
-                const aspectRatio = canvasWidth / canvasHeight;
+                // A4 크기 계산
+                const pageWidth = 210; // A4 width in mm
+                const pageHeight = 297; // A4 height in mm
+                const margin = 15;
                 
-                const margin = 20;
-                const maxWidth = 180;
-                const maxHeight = 257;
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const aspectRatio = imgWidth / imgHeight;
                 
-                let pdfCardWidth, pdfCardHeight;
+                let pdfCardWidth = pageWidth - (margin * 2);
+                let pdfCardHeight = pdfCardWidth / aspectRatio;
                 
-                if (aspectRatio > maxWidth / maxHeight) {
-                    pdfCardWidth = maxWidth;
-                    pdfCardHeight = maxWidth / aspectRatio;
-                } else {
-                    pdfCardHeight = maxHeight;
-                    pdfCardWidth = maxHeight * aspectRatio;
+                if (pdfCardHeight > pageHeight - (margin * 2)) {
+                    pdfCardHeight = pageHeight - (margin * 2);
+                    pdfCardWidth = pdfCardHeight * aspectRatio;
                 }
                 
-                const totalPdfWidth = pdfCardWidth + (margin * 2);
-                const totalPdfHeight = pdfCardHeight + (margin * 2);
-                
                 const pdf = new jsPDF({
-                    orientation: totalPdfWidth > totalPdfHeight ? 'landscape' : 'portrait',
+                    orientation: pdfCardHeight > pdfCardWidth ? 'portrait' : 'landscape',
                     unit: 'mm',
-                    format: [totalPdfWidth, totalPdfHeight]
+                    format: 'a4'
                 });
                 
-                pdf.addImage(imgData, 'PNG', margin, margin, pdfCardWidth, pdfCardHeight, undefined, 'FAST');
+                const x = (pageWidth - pdfCardWidth) / 2;
+                const y = (pageHeight - pdfCardHeight) / 2;
                 
-                const fileName = `${currentCardData.recipeName.replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]/g, '_')}.pdf`;
+                pdf.addImage(imgData, 'JPEG', x, y, pdfCardWidth, pdfCardHeight);
+                
+                const fileName = `우정레시피_${currentCardData.recipeName.replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]/g, '_')}.pdf`;
                 pdf.save(fileName);
 
-                document.body.removeChild(tempDiv);
-                alert('🎉 완벽한 PDF가 생성되었습니다! 정말 멋진 카드네요!');
+                alert('🎉 완벽한 PDF가 생성되었습니다! 이미지까지 깔끔하게 포함되었어요!');
 
             } catch (error) {
                 console.error('PDF 생성 오류:', error);
-                alert('❌ PDF 생성 중 오류가 발생했습니다. 수동 저장 방법을 이용해주세요.');
+                
+                // 상세한 오류 정보 제공
+                let errorMessage = '❌ PDF 생성 중 오류가 발생했습니다.\n\n';
+                
+                if (error.message.includes('SecurityError')) {
+                    errorMessage += '보안 오류: 브라우저 보안 정책으로 인한 문제입니다.\n';
+                    errorMessage += '해결 방법: "수동 저장 가이드"를 이용해주세요.';
+                } else if (error.message.includes('html2canvas')) {
+                    errorMessage += '캡처 오류: 이미지 처리 중 문제가 발생했습니다.\n';
+                    errorMessage += '해결 방법: 이미지를 제거하고 다시 시도해주세요.';
+                } else {
+                    errorMessage += `오류 내용: ${error.message}\n`;
+                    errorMessage += '해결 방법: 페이지를 새로고침하고 다시 시도해주세요.';
+                }
+                
+                alert(errorMessage);
                 document.getElementById('errorHelp').classList.remove('hidden');
             } finally {
                 document.getElementById('loading').classList.remove('show');
@@ -1224,32 +1490,47 @@
                 currentCardData = getCurrentData();
             }
             
-            const newWindow = window.open('', '_blank');
-            newWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>우정 레시피 카드</title>
-                    <style>
-                        body { 
-                            margin: 0; 
-                            padding: 20px; 
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                            font-family: system-ui; 
-                            min-height: 100vh;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                        }
-                        ${document.querySelector('style').textContent}
-                    </style>
-                </head>
-                <body>
-                    ${generateCardHTML(currentCardData)}
-                </body>
-                </html>
-            `);
-            newWindow.document.close();
+            // 현재 페이지에 임시로 전체화면 카드 표시
+            const fullscreenDiv = document.createElement('div');
+            fullscreenDiv.id = 'fullscreenCard';
+            fullscreenDiv.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                z-index: 3000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                box-sizing: border-box;
+            `;
+            
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '✕ 닫기';
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(0,0,0,0.7);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 16px;
+                z-index: 3001;
+            `;
+            closeButton.onclick = () => {
+                document.body.removeChild(fullscreenDiv);
+            };
+            
+            fullscreenDiv.innerHTML = generateCardHTML(currentCardData);
+            fullscreenDiv.appendChild(closeButton);
+            
+            document.body.appendChild(fullscreenDiv);
             closeManualGuide();
         }
 
@@ -1309,50 +1590,91 @@
             
             try {
                 const cardElement = document.getElementById('recipeCard');
-                const actualWidth = cardElement.offsetWidth;
-                const actualHeight = cardElement.offsetHeight;
+                
+                // 이미지 로딩 완료 대기
+                const images = cardElement.querySelectorAll('img');
+                if (images.length > 0) {
+                    await Promise.all(Array.from(images).map(img => {
+                        if (img.complete) return Promise.resolve();
+                        return new Promise(resolve => {
+                            img.onload = resolve;
+                            img.onerror = resolve;
+                        });
+                    }));
+                }
+                
+                // 폰트 로딩 대기
+                await new Promise(resolve => {
+                    if (document.fonts) {
+                        document.fonts.ready.then(() => {
+                            setTimeout(resolve, 1200);
+                        });
+                    } else {
+                        setTimeout(resolve, 1800);
+                    }
+                });
+                
+                // 카드 크기 동적 측정
+                const cardRect = cardElement.getBoundingClientRect();
+                const cardWidth = Math.max(560, cardRect.width);
+                const cardHeight = Math.max(400, cardRect.height);
                 
                 const canvas = await html2canvas(cardElement, {
-                    scale: 3,
-                    useCORS: true,
+                    scale: 2,
+                    useCORS: false,
+                    allowTaint: false,
                     backgroundColor: '#ffffff',
-                    width: actualWidth,
-                    height: actualHeight
+                    width: cardWidth,
+                    height: cardHeight,
+                    foreignObjectRendering: false,
+                    imageTimeout: 0,
+                    onclone: function(clonedDoc) {
+                        // 이미지 요소들의 크기 보정
+                        const clonedImages = clonedDoc.querySelectorAll('.card-image-section img');
+                        clonedImages.forEach(img => {
+                            img.style.maxWidth = '100%';
+                            img.style.maxHeight = '200px';
+                            img.style.objectFit = 'contain';
+                        });
+                        return clonedDoc;
+                    }
                 });
                 
                 const { jsPDF } = window.jspdf;
-                const imgData = canvas.toDataURL('image/png', 0.98);
+                const imgData = canvas.toDataURL('image/jpeg', 0.92);
                 
-                const aspectRatio = canvas.width / canvas.height;
-                const margin = 20;
-                const maxWidth = 180;
-                const maxHeight = 257;
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const aspectRatio = imgWidth / imgHeight;
                 
-                let pdfCardWidth, pdfCardHeight;
+                const pageWidth = 210;
+                const pageHeight = 297;
+                const margin = 15;
                 
-                if (aspectRatio > maxWidth / maxHeight) {
-                    pdfCardWidth = maxWidth;
-                    pdfCardHeight = maxWidth / aspectRatio;
-                } else {
-                    pdfCardHeight = maxHeight;
-                    pdfCardWidth = maxHeight * aspectRatio;
+                let pdfCardWidth = pageWidth - (margin * 2);
+                let pdfCardHeight = pdfCardWidth / aspectRatio;
+                
+                if (pdfCardHeight > pageHeight - (margin * 2)) {
+                    pdfCardHeight = pageHeight - (margin * 2);
+                    pdfCardWidth = pdfCardHeight * aspectRatio;
                 }
                 
-                const totalPdfWidth = pdfCardWidth + (margin * 2);
-                const totalPdfHeight = pdfCardHeight + (margin * 2);
-                
                 const pdf = new jsPDF({
-                    orientation: totalPdfWidth > totalPdfHeight ? 'landscape' : 'portrait',
+                    orientation: pdfCardHeight > pdfCardWidth ? 'portrait' : 'landscape',
                     unit: 'mm',
-                    format: [totalPdfWidth, totalPdfHeight]
+                    format: 'a4'
                 });
                 
-                pdf.addImage(imgData, 'PNG', margin, margin, pdfCardWidth, pdfCardHeight);
+                const x = (pageWidth - pdfCardWidth) / 2;
+                const y = (pageHeight - pdfCardHeight) / 2;
+                
+                pdf.addImage(imgData, 'JPEG', x, y, pdfCardWidth, pdfCardHeight);
                 pdf.save(`${currentCardData.recipeName}_shared.pdf`);
                 
-                alert('🎉 PDF가 성공적으로 생성되었습니다!');
+                alert('🎉 PDF가 성공적으로 생성되었습니다! 이미지도 완벽하게 포함되었어요!');
             } catch (error) {
-                alert('❌ PDF 생성 중 오류가 발생했습니다.');
+                console.error('공유 PDF 생성 오류:', error);
+                alert('❌ PDF 생성 중 오류가 발생했습니다. 수동 저장 가이드를 이용해주세요.');
             } finally {
                 document.getElementById('loading').classList.remove('show');
             }
