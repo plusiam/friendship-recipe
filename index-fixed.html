@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우정 레시피 카드 - 안정 버전</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 안정적인 버전의 라이브러리 사용 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <style>
+        /* 시스템 폰트 우선 사용으로 로딩 이슈 방지 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
+            line-height: 1.6;
+        }
+        .font-title { 
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
+            font-weight: 700;
+        }
+        
+        .theme-radio:checked + label {
+            border-color: #0ea5e9;
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* PDF 생성용 카드 스타일 최적화 */
+        .pdf-card {
+            background: white !important;
+            width: 560px !important;
+            min-height: 400px !important;
+            padding: 20px !important;
+            box-sizing: border-box !important;
+            border: 3px dashed #ccc !important;
+            border-radius: 15px !important;
+            position: relative !important;
+        }
+        
+        /* html2canvas 호환성을 위한 간단한 그라데이션 */
+        .bg-simple-pastel { background: linear-gradient(to bottom right, #fef3c7, #fce7f3); }
+        .bg-simple-green { background: linear-gradient(to bottom right, #f0fdf4, #e3f3e5); }
+        .bg-simple-orange { background: linear-gradient(to bottom right, #fff7ed, #ffedd5); }
+        .bg-simple-navy { background: #1e3a8a; color: white; }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 숨김 요소 */
+        .hidden { display: none !important; }
+        
+        /* 공유 카드 표시 영역 */
+        #sharedCardDisplayArea {
+            display: none;
+            flex-direction: column; 
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 100vh; 
+            padding: 1rem;
+        }
+        #sharedCardDisplayArea.show {
+            display: flex;
+        }
+        
+        #recipeCardWrapper, #recipeCardWrapperShared {
+            width: 560px; 
+            height: auto;
+            min-height: 400px;
+            margin: auto; 
+        }
+        
+        @media print {
+            body * { visibility: hidden; }
+            .pdf-card, .pdf-card * { visibility: visible; }
+            .pdf-card { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100vw !important;
+                height: auto !important;
+                margin: 0; 
+                transform: scale(1);
+                transform-origin: top left;
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+
+    <!-- 로딩 오버레이 -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3 class="text-lg font-semibold text-gray-800">PDF 생성 중...</h3>
+            <p class="text-sm text-gray-600 mt-2">잠시만 기다려주세요</p>
+        </div>
+    </div>
+
+    <div id="mainContent" class="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6 md:p-10 space-y-8">
+        <div class="text-center border-b pb-6">
+            <h1 class="text-4xl font-title text-gray-800 mb-2">우정 레시피 카드 만들기 🎨</h1>
+            <p class="text-gray-600">PDF 생성 오류 수정 버전</p>
+            <div class="bg-blue-50 mt-4 p-4 rounded-lg border border-blue-200">
+                <p class="text-sm text-blue-800">
+                    🔧 <strong>개선사항:</strong> PDF 생성 안정성 향상, 다중 저장 방법 제공, 오류 해결 가이드 포함
+                </p>
+            </div>
+        </div>
+
+        <form id="recipeForm" class="space-y-6">
+            <div>
+                <label class="text-lg font-semibold text-gray-700 mb-3 block">1️⃣ 카드 테마 선택</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <input type="radio" name="theme" id="theme-pastel" value="pastel" class="hidden theme-radio" checked>
+                    <label for="theme-pastel" class="p-4 text-center rounded-lg cursor-pointer transition border-2 border-transparent hover:shadow-md bg-simple-pastel">
+                        ✨ 솜사탕 파스텔
+                    </label>
+                    
+                    <input type="radio" name="theme" id="theme-green" value="green" class="hidden theme-radio">
+                    <label for="theme-green" class="p-4 text-center rounded-lg cursor-pointer transition border-2 border-transparent hover:shadow-md bg-simple-green">
+                        🌿 싱그러운 초록
+                    </label>
+
+                    <input type="radio" name="theme" id="theme-orange" value="orange" class="hidden theme-radio">
+                    <label for="theme-orange" class="p-4 text-center rounded-lg cursor-pointer transition border-2 border-transparent hover:shadow-md bg-simple-orange">
+                        🍊 상큼한 오렌지
+                    </label>
+
+                    <input type="radio" name="theme" id="theme-navy" value="navy" class="hidden theme-radio">
+                    <label for="theme-navy" class="p-4 text-center rounded-lg cursor-pointer transition border-2 border-transparent text-white hover:shadow-md bg-simple-navy">
+                        🌙 깊은 밤 네이비
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-lg font-semibold text-gray-700 mb-3 block">2️⃣ 레시피 정보 입력</label>
+                <div class="space-y-4">
+                    <input type="text" id="recipe_name" class="block w-full p-3 border border-gray-300 rounded-md focus:ring-sky-500 focus:border-sky-500" placeholder="레시피 이름 (예: 행복을 부르는 초콜릿 케이크)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="friend_name" class="block w-full p-3 border border-gray-300 rounded-md focus:ring-sky-500 focus:border-sky-500" placeholder="받는 친구 이름 (To.)">
+                        <input type="text" id="sender_name" class="block w-full p-3 border border-gray-300 rounded-md focus:ring-sky-500 focus:border-sky-500" placeholder="내 이름 (From.)">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-lg font-semibold text-gray-700 mb-3 block">3️⃣ 우정 재료 추가</label>
+                <div id="ingredients-container" class="mt-2 space-y-2"></div>
+                <button type="button" id="addIngredientBtn" class="mt-3 px-4 py-2 bg-yellow-400 text-yellow-800 font-semibold rounded-md hover:bg-yellow-500 transition text-sm">
+                    ➕ 재료 추가하기
+                </button>
+            </div>
+
+            <div>
+                <label class="text-lg font-semibold text-gray-700 mb-3 block">4️⃣ 만드는 방법과 추억 사진</label>
+                <textarea id="instructions" rows="5" class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-sky-500 focus:border-sky-500" placeholder="우정 레시피 만드는 방법을 자유롭게 적어주세요..."></textarea>
+                
+                <input type="file" id="imageUpload" accept="image/*" class="mt-3 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100"/>
+                <p class="text-xs text-orange-600 mt-1">※ 더 안정적인 PDF 생성을 위해 500KB 이하의 이미지를 권장합니다.</p>
+                
+                <div id="imagePreviewContainer" class="hidden mt-4 text-center">
+                    <img id="imagePreview" src="#" alt="미리보기 이미지" class="max-h-48 rounded-md shadow-md mx-auto"/>
+                    <button type="button" id="deleteImageBtn" class="mt-2 px-3 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 hidden">이미지 삭제</button>
+                </div>
+            </div>
+            
+            <!-- 저장 방법 안내 -->
+            <div class="bg-gradient-to-r from-sky-50 to-blue-50 p-6 rounded-lg border border-sky-200">
+                <h3 class="text-lg font-semibold text-sky-800 mb-3">💾 저장 방법 선택</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <button type="button" id="previewBtn" class="w-full px-4 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition">
+                            🖼️ 미리보기
+                        </button>
+                        <p class="text-xs text-gray-600 mt-1">카드 확인하기</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="button" id="generatePdfBtn" class="w-full px-4 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
+                            📄 PDF 저장
+                        </button>
+                        <p class="text-xs text-gray-600 mt-1">자동 PDF 생성</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="button" id="manualSaveBtn" class="w-full px-4 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition">
+                            📸 수동 저장
+                        </button>
+                        <p class="text-xs text-gray-600 mt-1">화면캡처 가이드</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="button" id="createShareLinkBtn" class="w-full px-6 py-3 bg-purple-500 text-white font-semibold rounded-lg hover:bg-purple-600 transition">
+                        🔗 공유 링크 만들기
+                    </button>
+                </div>
+            </div>
+
+            <!-- PDF 생성 실패 시 대안 -->
+            <div id="errorHelp" class="hidden bg-red-50 p-4 rounded-lg border border-red-200">
+                <h4 class="font-semibold text-red-800 mb-2">⚠️ PDF 생성이 안 될 때 해결 방법</h4>
+                <div class="text-sm text-red-700 space-y-2">
+                    <p><strong>방법 1:</strong> 브라우저 새로고침 후 다시 시도</p>
+                    <p><strong>방법 2:</strong> 이미지 없이 텍스트만으로 다시 시도</p>
+                    <p><strong>방법 3:</strong> 다른 브라우저(Chrome, Firefox 등)에서 시도</p>
+                    <p><strong>방법 4:</strong> 아래 "수동 저장" 버튼으로 화면 캡처 사용</p>
+                </div>
+            </div>
+
+            <!-- 공유 링크 영역 -->
+            <div id="shareLinkContainer" class="hidden bg-green-50 p-4 rounded-lg border border-green-200">
+                <label for="shareableLink" class="block text-sm font-medium text-green-700 mb-2">🔗 공유 링크:</label>
+                <p class="text-xs text-green-600 mb-2">이 링크를 복사해서 친구에게 보내면, 친구가 당신이 만든 카드를 볼 수 있어요!</p>
+                <div class="flex space-x-2">
+                    <input type="text" id="shareableLink" readonly class="w-full p-2 border border-green-300 rounded-md shadow-sm bg-white text-sm">
+                    <button type="button" id="copyLinkBtn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm transition">복사</button>
+                </div>
+                <p id="copyFeedback" class="text-sm text-green-600 mt-2 hidden">✅ 링크가 복사되었습니다!</p>
+            </div>
+        </form>
+    </div>
+
+    <!-- 미리보기 모달 -->
+    <div id="previewModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-xl shadow-2xl relative max-w-4xl w-auto">
+            <button id="closeModalBtn" class="absolute -top-3 -right-3 bg-white rounded-full p-2 shadow-lg w-10 h-10 flex items-center justify-center text-xl font-bold text-gray-700 hover:text-red-500">×</button>
+            <div class="text-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">🎉 완성된 우정 레시피 카드</h3>
+            </div>
+            <div id="recipeCardWrapper">
+                <!-- 카드가 여기에 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 수동 저장 가이드 모달 -->
+    <div id="manualSaveModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-xl shadow-2xl relative max-w-2xl w-full">
+            <button id="closeManualModalBtn" class="absolute -top-3 -right-3 bg-white rounded-full p-2 shadow-lg w-10 h-10 flex items-center justify-center text-xl font-bold text-gray-700 hover:text-red-500">×</button>
+            <div class="text-center">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">📸 수동 저장 가이드</h3>
+                <div class="bg-yellow-50 p-4 rounded-lg text-left space-y-3">
+                    <h4 class="font-semibold text-yellow-800">화면 캡처 방법:</h4>
+                    <div class="text-sm text-yellow-700 space-y-2">
+                        <p><strong>🖥️ Windows:</strong> Windows + Shift + S 키</p>
+                        <p><strong>🍎 Mac:</strong> Cmd + Shift + 4 키</p>
+                        <p><strong>💻 크롬북:</strong> Ctrl + Shift + 화면보기 키</p>
+                        <p><strong>📱 모바일:</strong> 전원 + 볼륨 Down 버튼</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="button" id="showCardForCapture" class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
+                        카드 전체화면으로 보기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 공유된 카드 표시 영역 -->
+    <div id="sharedCardDisplayArea" class="w-full">
+        <div id="recipeCardWrapperShared" class="mx-auto">
+            <!-- 공유된 카드가 여기에 표시됩니다 -->
+        </div>
+        <div class="text-center mt-6 space-y-3">
+            <p class="text-gray-600">친구가 만든 우정 레시피 카드예요! 💝</p>
+            <button id="printSharedCardBtn" class="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition">
+                이 카드 PDF로 저장하기 🖨️
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImageSrc = '';
+        let lastCardData = null;
+        let librariesLoaded = false;
+
+        // 라이브러리 로딩 체크
+        function checkLibraries() {
+            return new Promise((resolve) => {
+                const checkInterval = setInterval(() => {
+                    if (typeof html2canvas !== 'undefined' && typeof window.jspdf !== 'undefined') {
+                        clearInterval(checkInterval);
+                        librariesLoaded = true;
+                        console.log('📚 라이브러리 로딩 완료');
+                        resolve(true);
+                    }
+                }, 100);
+                
+                // 10초 후 타임아웃
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    resolve(false);
+                }, 10000);
+            });
+        }
+
+        // DOM 요소들
+        const addIngredientBtn = document.getElementById('addIngredientBtn');
+        const ingredientsContainer = document.getElementById('ingredients-container');
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const deleteImageBtn = document.getElementById('deleteImageBtn');
+        const previewBtn = document.getElementById('previewBtn');
+        const generatePdfBtn = document.getElementById('generatePdfBtn');
+        const manualSaveBtn = document.getElementById('manualSaveBtn');
+        const createShareLinkBtn = document.getElementById('createShareLinkBtn');
+        const previewModal = document.getElementById('previewModal');
+        const manualSaveModal = document.getElementById('manualSaveModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const closeManualModalBtn = document.getElementById('closeManualModalBtn');
+        const recipeCardWrapper = document.getElementById('recipeCardWrapper');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const errorHelp = document.getElementById('errorHelp');
+        const showCardForCapture = document.getElementById('showCardForCapture');
+        const shareLinkContainer = document.getElementById('shareLinkContainer');
+        const shareableLink = document.getElementById('shareableLink');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        const copyFeedback = document.getElementById('copyFeedback');
+        const sharedCardDisplayArea = document.getElementById('sharedCardDisplayArea');
+        const recipeCardWrapperShared = document.getElementById('recipeCardWrapperShared');
+        const printSharedCardBtn = document.getElementById('printSharedCardBtn');
+        const mainContent = document.getElementById('mainContent');
+
+        // 테마 설정
+        const themes = {
+            pastel: { 
+                cardClass: "bg-simple-pastel", 
+                titleClass: "text-sky-700", 
+                subTitleClass: "text-pink-600", 
+                toFromClass: "text-gray-700",
+                sectionBgClass: "bg-white bg-opacity-70",
+                ingTitleClass: "text-yellow-600",
+                instTitleClass: "text-green-600"
+            },
+            green: { 
+                cardClass: "bg-simple-green", 
+                titleClass: "text-green-800", 
+                subTitleClass: "text-green-600", 
+                toFromClass: "text-gray-700",
+                sectionBgClass: "bg-white bg-opacity-80",
+                ingTitleClass: "text-yellow-700",
+                instTitleClass: "text-green-700"
+            },
+            orange: { 
+                cardClass: "bg-simple-orange", 
+                titleClass: "text-orange-800", 
+                subTitleClass: "text-red-600", 
+                toFromClass: "text-gray-700",
+                sectionBgClass: "bg-white bg-opacity-80",
+                ingTitleClass: "text-amber-700",
+                instTitleClass: "text-orange-700"
+            },
+            navy: { 
+                cardClass: "bg-simple-navy", 
+                titleClass: "text-yellow-300", 
+                subTitleClass: "text-sky-300", 
+                toFromClass: "text-gray-200",
+                sectionBgClass: "bg-gray-700 bg-opacity-50",
+                ingTitleClass: "text-yellow-300",
+                instTitleClass: "text-green-300"
+            }
+        };
+
+        function generateCardHTML(data) {
+            const currentTheme = themes[data.themeName] || themes.pastel;
+            const creationDate = data.date || new Date().toLocaleDateString('ko-KR');
+
+            let ingredientsHtml = data.ingredients && data.ingredients.length > 0 
+                ? data.ingredients.map(ing => `<li class="flex items-center"><span class="${currentTheme.ingTitleClass} mr-2">•</span> ${ing}</li>`).join('') 
+                : ['믿음 한 줌', '웃음 2스푼', '배려 적당히', '소통 듬뿍'].map(ing => `<li class="flex items-center"><span class="${currentTheme.ingTitleClass} mr-2">•</span> ${ing}</li>`).join('');
+
+            const imageHtml = data.imageSrc ? 
+                `<div class="mt-4 ${currentTheme.sectionBgClass} p-3 rounded-lg">
+                    <h3 class="text-lg font-bold ${currentTheme.ingTitleClass} mb-2">📸 추억 한 장</h3>
+                    <img src="${data.imageSrc}" class="rounded-md w-full max-h-24 object-contain"/>
+                </div>` : '';
+
+            return `
+            <div id="recipeCard" class="pdf-card ${currentTheme.cardClass}">
+                <div class="text-center mb-4">
+                    <h2 class="text-3xl font-title font-bold ${currentTheme.titleClass} leading-tight">${data.recipeName}</h2>
+                    <p class="text-lg ${currentTheme.subTitleClass} mt-2">✨ 우정을 위한 특별한 레시피 ✨</p>
+                    <div class="flex justify-between items-center text-sm ${currentTheme.toFromClass} mt-3">
+                        <span class="${currentTheme.sectionBgClass} px-3 py-1 rounded-full">
+                            <span class="font-semibold">To.</span> <span class="font-bold">${data.friendName}</span>
+                        </span>
+                        <span class="${currentTheme.sectionBgClass} px-3 py-1 rounded-full">
+                            <span class="font-semibold">From.</span> <span class="font-bold">${data.senderName}</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 flex-1">
+                    <div class="space-y-3">
+                        <div class="${currentTheme.sectionBgClass} p-3 rounded-lg">
+                            <h3 class="text-xl font-bold ${currentTheme.ingTitleClass} mb-3">⭐ 우정 재료</h3>
+                            <ul class="space-y-2 text-sm ${currentTheme.toFromClass}">${ingredientsHtml}</ul>
+                        </div>
+                        ${imageHtml}
+                    </div>
+                    <div>
+                        <div class="${currentTheme.sectionBgClass} p-3 rounded-lg h-full">
+                            <h3 class="text-xl font-bold ${currentTheme.instTitleClass} mb-3">🍳 만드는 방법</h3>
+                            <p class="text-sm ${currentTheme.toFromClass} whitespace-pre-wrap leading-relaxed">${data.instructions}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <div class="inline-flex items-center ${currentTheme.sectionBgClass} px-4 py-2 rounded-full">
+                        <span class="text-xs ${currentTheme.toFromClass}">💖 우정을 담아, ${creationDate}</span>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function getCurrentFormData() {
+            return {
+                themeName: document.querySelector('input[name="theme"]:checked').value,
+                recipeName: document.getElementById('recipe_name').value || '소중한 우정 레시피',
+                friendName: document.getElementById('friend_name').value || '나의 소중한 친구',
+                senderName: document.getElementById('sender_name').value || '진정한 친구',
+                instructions: document.getElementById('instructions').value || '이 레시피의 비법은 바로 진심어린 마음입니다!',
+                ingredients: Array.from(document.querySelectorAll('.ingredient-input')).map(i => i.value).filter(v => v),
+                imageSrc: uploadedImageSrc,
+                date: new Date().toLocaleDateString('ko-KR')
+            };
+        }
+
+        // 재료 추가 기능
+        addIngredientBtn.addEventListener('click', () => {
+            const ingredientDiv = document.createElement('div');
+            ingredientDiv.className = 'flex items-center space-x-2';
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.className = 'ingredient-input flex-grow p-2.5 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500';
+            newInput.placeholder = '재료와 양 (예: 웃음 2스푼, 인내심 한 컵)';
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.innerText = '×';
+            removeBtn.className = 'px-2 py-1 bg-red-500 text-white rounded-full text-xs font-bold hover:bg-red-600';
+            removeBtn.onclick = () => ingredientDiv.remove();
+            ingredientDiv.appendChild(newInput);
+            ingredientDiv.appendChild(removeBtn);
+            ingredientsContainer.appendChild(ingredientDiv);
+        });
+
+        // 이미지 업로드 처리
+        imageUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const maxSize = 500 * 1024; // 500KB로 제한 강화
+                if (file.size > maxSize) {
+                    alert("PDF 생성 안정성을 위해 500KB 이하의 이미지를 선택해주세요.");
+                    imageUpload.value = "";
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImageSrc = e.target.result;
+                    imagePreview.src = uploadedImageSrc;
+                    imagePreviewContainer.classList.remove('hidden');
+                    deleteImageBtn.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        deleteImageBtn.addEventListener('click', () => {
+            uploadedImageSrc = '';
+            imageUpload.value = "";
+            imagePreview.src = '#';
+            imagePreviewContainer.classList.add('hidden');
+            deleteImageBtn.classList.add('hidden');
+        });
+
+        // 미리보기 기능
+        previewBtn.addEventListener('click', () => {
+            lastCardData = getCurrentFormData();
+            recipeCardWrapper.innerHTML = generateCardHTML(lastCardData);
+            previewModal.classList.remove('hidden');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            previewModal.classList.add('hidden');
+        });
+
+        // 안정적인 PDF 생성 기능
+        generatePdfBtn.addEventListener('click', async () => {
+            // 라이브러리 로딩 확인
+            if (!librariesLoaded) {
+                const loaded = await checkLibraries();
+                if (!loaded) {
+                    alert('라이브러리 로딩에 실패했습니다. 페이지를 새로고침하거나 수동 저장을 이용해주세요.');
+                    errorHelp.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            // 로딩 시작
+            loadingOverlay.style.display = 'flex';
+            generatePdfBtn.disabled = true;
+            
+            try {
+                // 최신 데이터로 카드 생성
+                lastCardData = getCurrentFormData();
+                
+                // 임시 카드 생성 (화면에 보이지 않는)
+                const tempContainer = document.createElement('div');
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.left = '-9999px';
+                tempContainer.style.top = '-9999px';
+                tempContainer.innerHTML = generateCardHTML(lastCardData);
+                document.body.appendChild(tempContainer);
+                
+                const cardElement = tempContainer.querySelector('#recipeCard');
+                
+                // 잠시 대기 (렌더링 완료 대기)
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // html2canvas로 캡처
+                const canvas = await html2canvas(cardElement, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    width: 560,
+                    height: 400
+                });
+                
+                // PDF 생성
+                const { jsPDF } = window.jspdf;
+                const imgData = canvas.toDataURL('image/png', 0.95);
+                
+                // A4 가로 크기에 맞게 조정
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                
+                // 카드 비율 유지하면서 크기 조정
+                const cardRatio = 560 / 400;
+                let cardWidth = pdfWidth * 0.8;
+                let cardHeight = cardWidth / cardRatio;
+                
+                if (cardHeight > pdfHeight * 0.8) {
+                    cardHeight = pdfHeight * 0.8;
+                    cardWidth = cardHeight * cardRatio;
+                }
+                
+                const x = (pdfWidth - cardWidth) / 2;
+                const y = (pdfHeight - cardHeight) / 2;
+                
+                pdf.addImage(imgData, 'PNG', x, y, cardWidth, cardHeight);
+                
+                // 파일명 생성 및 저장
+                const fileName = `${(lastCardData.recipeName || '우정레시피카드').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]/g, '_')}.pdf`;
+                pdf.save(fileName);
+                
+                // 임시 요소 제거
+                document.body.removeChild(tempContainer);
+                
+                alert('✅ PDF가 성공적으로 생성되었습니다!');
+                
+            } catch (error) {
+                console.error('PDF 생성 오류:', error);
+                alert('❌ PDF 생성 중 오류가 발생했습니다. 수동 저장 방법을 이용해주세요.');
+                errorHelp.classList.remove('hidden');
+            } finally {
+                loadingOverlay.style.display = 'none';
+                generatePdfBtn.disabled = false;
+            }
+        });
+
+        // 수동 저장 가이드
+        manualSaveBtn.addEventListener('click', () => {
+            manualSaveModal.classList.remove('hidden');
+        });
+
+        closeManualModalBtn.addEventListener('click', () => {
+            manualSaveModal.classList.add('hidden');
+        });
+
+        showCardForCapture.addEventListener('click', () => {
+            lastCardData = getCurrentFormData();
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>우정 레시피 카드</title>
+                    <style>
+                        body { margin: 0; padding: 20px; background: #f3f4f6; font-family: system-ui; }
+                        ${document.querySelector('style').textContent}
+                    </style>
+                </head>
+                <body>
+                    <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+                        ${generateCardHTML(lastCardData)}
+                    </div>
+                </body>
+                </html>
+            `);
+            newWindow.document.close();
+            manualSaveModal.classList.add('hidden');
+        });
+
+        // 공유 링크 생성
+        createShareLinkBtn.addEventListener('click', () => {
+            if (!lastCardData) {
+                lastCardData = getCurrentFormData();
+            }
+            
+            const params = new URLSearchParams();
+            params.append('v', '1');
+            params.append('theme', encodeURIComponent(lastCardData.themeName));
+            params.append('recipeName', encodeURIComponent(lastCardData.recipeName));
+            params.append('friendName', encodeURIComponent(lastCardData.friendName));
+            params.append('senderName', encodeURIComponent(lastCardData.senderName));
+            params.append('instructions', encodeURIComponent(lastCardData.instructions));
+            params.append('ingredients', encodeURIComponent(JSON.stringify(lastCardData.ingredients)));
+            params.append('date', encodeURIComponent(lastCardData.date));
+            if (lastCardData.imageSrc) {
+                params.append('imageSrc', encodeURIComponent(lastCardData.imageSrc));
+            }
+
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}?${params.toString()}`;
+            
+            shareableLink.value = shareUrl;
+            shareLinkContainer.classList.remove('hidden');
+            copyFeedback.classList.add('hidden');
+        });
+
+        // 링크 복사
+        copyLinkBtn.addEventListener('click', () => {
+            shareableLink.select();
+            try {
+                navigator.clipboard.writeText(shareableLink.value)
+                    .then(() => {
+                        copyFeedback.textContent = "✅ 링크가 복사되었습니다!";
+                        copyFeedback.classList.remove('hidden');
+                        setTimeout(() => copyFeedback.classList.add('hidden'), 3000);
+                    })
+                    .catch(err => {
+                        copyFeedback.textContent = "복사 실패. 직접 선택 후 복사해주세요.";
+                        copyFeedback.classList.remove('hidden');
+                    });
+            } catch (err) {
+                copyFeedback.textContent = "복사 기능이 지원되지 않는 환경입니다. 직접 선택 후 복사해주세요.";
+                copyFeedback.classList.remove('hidden');
+            }
+        });
+
+        // 공유된 카드 로드
+        function loadSharedCard() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('recipeName') && params.get('v') === '1') {
+                const sharedData = {
+                    themeName: decodeURIComponent(params.get('theme') || 'pastel'),
+                    recipeName: decodeURIComponent(params.get('recipeName')),
+                    friendName: decodeURIComponent(params.get('friendName')),
+                    senderName: decodeURIComponent(params.get('senderName')),
+                    instructions: decodeURIComponent(params.get('instructions')),
+                    ingredients: JSON.parse(decodeURIComponent(params.get('ingredients') || '[]')),
+                    imageSrc: params.has('imageSrc') ? decodeURIComponent(params.get('imageSrc')) : '',
+                    date: decodeURIComponent(params.get('date'))
+                };
+
+                // 메인 폼 숨기고 공유 카드 표시
+                mainContent.style.display = 'none';
+                recipeCardWrapperShared.innerHTML = generateCardHTML(sharedData);
+                sharedCardDisplayArea.classList.add('show');
+
+                // 공유된 카드 PDF 저장 기능
+                printSharedCardBtn.onclick = async () => {
+                    if (!librariesLoaded) {
+                        await checkLibraries();
+                    }
+                    
+                    loadingOverlay.style.display = 'flex';
+                    printSharedCardBtn.disabled = true;
+                    
+                    try {
+                        const cardToPrint = recipeCardWrapperShared.querySelector('#recipeCard');
+                        const canvas = await html2canvas(cardToPrint, {
+                            scale: 2,
+                            useCORS: true,
+                            backgroundColor: '#ffffff'
+                        });
+                        
+                        const { jsPDF } = window.jspdf;
+                        const imgData = canvas.toDataURL('image/png', 0.95);
+                        const pdf = new jsPDF('landscape', 'mm', 'a4');
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const pdfHeight = pdf.internal.pageSize.getHeight();
+                        
+                        const cardRatio = 560 / 400;
+                        let cardWidth = pdfWidth * 0.8;
+                        let cardHeight = cardWidth / cardRatio;
+                        
+                        if (cardHeight > pdfHeight * 0.8) {
+                            cardHeight = pdfHeight * 0.8;
+                            cardWidth = cardHeight * cardRatio;
+                        }
+                        
+                        const x = (pdfWidth - cardWidth) / 2;
+                        const y = (pdfHeight - cardHeight) / 2;
+                        
+                        pdf.addImage(imgData, 'PNG', x, y, cardWidth, cardHeight);
+                        pdf.save(`${(sharedData.recipeName || '우정레시피카드').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]/g, '_')}_shared.pdf`);
+                        
+                        alert('✅ PDF가 성공적으로 생성되었습니다!');
+                    } catch (error) {
+                        alert('❌ PDF 생성 중 오류가 발생했습니다.');
+                    } finally {
+                        loadingOverlay.style.display = 'none';
+                        printSharedCardBtn.disabled = false;
+                    }
+                };
+            } else {
+                // 일반 모드
+                sharedCardDisplayArea.classList.remove('show');
+                sharedCardDisplayArea.style.display = 'none';
+                mainContent.style.display = 'block';
+            }
+        }
+
+        // 페이지 로드 시 라이브러리 체크 및 공유 카드 로드
+        window.addEventListener('load', () => {
+            checkLibraries().then(loaded => {
+                if (loaded) {
+                    console.log('✅ PDF 생성 준비 완료');
+                } else {
+                    console.warn('⚠️ 라이브러리 로딩 지연됨');
+                }
+            });
+            loadSharedCard();
+        });
+
+    </script>
+</body>
+</html>
