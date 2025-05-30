@@ -187,11 +187,12 @@
                      <img src="${data.imageSrc}" class="rounded-md shadow-sm w-full max-h-24 object-contain"/>
                   </div>` : '';
             
-            let cardBaseClasses = "font-gowun p-4 rounded-xl shadow-lg w-full h-full flex flex-col justify-between";
-            if (data.themeName === 'navy') cardBaseClasses += " text-white";
+            // Tailwind CSS 클래스만으로 간단하게 처리
+            const cardClasses = `font-gowun p-4 rounded-xl shadow-lg w-full h-full flex flex-col justify-between ${currentTheme.cardClass}`;
+            const borderColor = data.themeName === 'navy' ? '#4b5563' : 'white';
 
             return `
-            <div id="recipeCard" class="${cardBaseClasses} ${currentTheme.cardClass}" style="border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 3px dashed ${data.themeName === 'navy' ? '#4b5563' : 'white'};">
+            <div id="recipeCard" class="${cardClasses}" style="border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 3px dashed ${borderColor};">
                 <div class="text-center">
                     <h2 class="text-3xl font-dongle font-bold ${currentTheme.titleClass} leading-tight">${data.recipeName}</h2>
                     <p class="text-lg ${currentTheme.subTitleClass} mt-1 font-gowun">✨ 우정을 위한 특별한 레시피 ✨</p>
