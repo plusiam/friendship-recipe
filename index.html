@@ -3,26 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우정 레시피 카드 만들기 (안정화 버전)</title>
+    <title>우정 레시피 카드 만들기</title>
     <meta name="description" content="친구들과 함께 특별한 우정 레시피 카드를 만들어보세요. 나만의 추억이 담긴 카드를 디자인하고 공유할 수 있습니다.">
     
+    <!-- 시스템 폰트 사용으로 안정성 확보 -->
+    
+    <!-- 라이브러리 로딩 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
-        /* 시스템 기본 폰트 적용 */
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        /* 시스템 폰트 사용으로 안정성 및 호환성 확보 */
+        body, #mainContent, #mainContent *, #recipeCard, #recipeCard * {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", sans-serif !important;
         }
-        /* 제목 등 기본 폰트 사용 시 크기 조정 */
-        #mainContent h1 { font-size: 30px !important; font-weight: bold !important; }
-        #recipeCard h2 { font-size: 26px !important; font-weight: bold !important; } /* 카드 내 제목 */
-        #recipeCard h3 { font-size: 20px !important; font-weight: bold !important; } /* 카드 내 소제목 (재료, 만드는 방법 등) */
-        #recipeCard h4 { font-size: 18px !important; font-weight: bold !important; } /* 카드 내 이미지 섹션 제목 */
-        #recipeCard p, #recipeCard li, #recipeCard span, #recipeCard label { font-size: 14px !important; } /* 카드 내 일반 텍스트 */
-        #recipeCard .text-xs { font-size: 12px !important; } /* 카드 내 작은 텍스트 */
-        #recipeCard .text-lg { font-size: 16px !important; } /* 카드 내 '우정을 위한 특별한 레시피' 문구 */
+        
+        /* 제목용 폰트 크기 조정 */
+        #mainContent h1 { 
+            font-size: 2.5rem !important; 
+            font-weight: bold !important; 
+            line-height: 1.2 !important;
+        }
+        #recipeCard h2 { 
+            font-size: 2rem !important; 
+            font-weight: bold !important; 
+            line-height: 1.3 !important;
+        }
+        #recipeCard h3, #recipeCard h4 { 
+            font-size: 1.25rem !important; 
+            font-weight: bold !important; 
+            line-height: 1.4 !important;
+        }
+        #recipeCard p, #recipeCard li, #recipeCard span { 
+            font-size: 0.875rem !important; 
+            line-height: 1.5 !important;
+        }
+        #recipeCard .text-xs { 
+            font-size: 0.75rem !important; 
+        }
+        #recipeCard .text-lg { 
+            font-size: 1.125rem !important; 
+        }
         
         /* 접근성 개선 - 포커스 스타일 */
         .focus-visible:focus-visible {
@@ -64,7 +85,7 @@
         #recipeCardWrapper, #recipeCardWrapperShared {
             width: 560px; 
             height: auto;
-            min-height: 400px; /* 카드가 너무 작아지는 것을 방지 */
+            min-height: 400px;
             margin: auto; 
         }
         
@@ -121,19 +142,22 @@
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 md:p-8">
 
+    <!-- 메인 콘텐츠 -->
     <main id="mainContent" class="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-6 md:p-10 space-y-8" role="main">
+        <!-- 헤더 -->
         <header class="text-center">
-            <h1>우정 레시피 카드 🎨</h1>
+            <h1 class="text-4xl font-bold text-gray-800">우정 레시피 카드 🎨</h1>
             <p class="text-gray-500 mt-2">세상에 단 하나뿐인 레시피 카드를 직접 디자인해보세요!</p>
-            <p class="text-sm text-gray-600 mt-3 p-3 bg-yellow-100 rounded-md border border-yellow-300">
-                💡 **중요 안내:**<br>
-                PDF 저장 또는 공유 링크 생성 시에는 **안정성을 위해 첨부 이미지가 카드에 포함되지 않습니다.**<br>
-                이미지가 포함된 완성된 카드를 저장하고 싶으시면, ['미리보기 🖼️'] 버튼으로 나타난 화면을 직접 **캡처(스크린샷 기능)**해서 사용해주세요.
+            <p class="text-sm text-blue-600 mt-3 p-2 bg-blue-50 rounded-md">
+                ✨ <strong>안정성 개선!</strong> 추억 사진이 완벽하게 포함된 이미지를 안정적으로 다운로드할 수 있습니다.<br>
+                📎 <strong>공유 팁:</strong> 사진 포함 공유는 이미지 다운로드 후 직접 전송해주세요!
             </p>
         </header>
 
+        <!-- 메인 폼 -->
         <form id="recipeForm" onsubmit="return false;" class="space-y-6" role="form" aria-label="우정 레시피 카드 제작 폼">
             
+            <!-- 1. 테마 선택 -->
             <section>
                 <h2 class="text-lg font-semibold text-gray-700 mb-2">1. 카드 테마 선택</h2>
                 <fieldset id="theme-selector" class="grid grid-cols-2 md:grid-cols-4 gap-3" role="radiogroup" aria-labelledby="theme-label">
@@ -177,6 +201,7 @@
                 </fieldset>
             </section>
 
+            <!-- 2. 레시피 정보 입력 -->
             <section>
                 <h2 class="text-lg font-semibold text-gray-700 mb-2">2. 레시피 정보 입력</h2>
                 <div class="space-y-4">
@@ -209,6 +234,7 @@
                 </div>
             </section>
 
+            <!-- 3. 재료 추가 -->
             <section>
                 <h2 class="text-lg font-semibold text-gray-700">3. 우정 재료 추가</h2>
                 <div id="ingredients-container" class="mt-2 space-y-2" role="group" aria-labelledby="ingredients-label"></div>
@@ -220,6 +246,7 @@
                 </button>
             </section>
 
+            <!-- 4. 만드는 방법 & 사진 -->
             <section>
                 <h2 class="text-lg font-semibold text-gray-700">4. 만드는 방법 & 추억 사진</h2>
                 <div>
@@ -232,11 +259,12 @@
                 </div>
                 
                 <div class="mt-4">
-                    <label for="imageUpload" class="block text-sm font-medium text-gray-700 mb-2">추억 사진 첨부 (선택사항, 미리보기에서만 표시)</label>
+                    <label for="imageUpload" class="block text-sm font-medium text-gray-700 mb-2">추억 사진 첨부 (선택사항)</label>
                     <input type="file" id="imageUpload" accept="image/*" 
                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 focus-visible"
                            aria-describedby="image-upload-help"/>
-                    <p id="image-upload-help" class="text-xs text-gray-600 mt-1">카드에 추가할 사진을 선택해주세요. (PDF/공유 링크에는 포함되지 않음)</p>
+                    <p id="image-upload-help" class="text-xs text-gray-600 mt-1">카드에 추가할 사진을 선택해주세요. 이미지 다운로드 시 완벽하게 포함됩니다.</p>
+                    <p id="imageUploadOverallWarning" class="text-xs text-amber-600 mt-1 hidden" role="alert" aria-live="polite">💡 공유 링크에는 텍스트만 포함됩니다. 사진 포함 공유는 이미지 다운로드를 이용해주세요!</p>
                     
                     <div id="imagePreviewContainer" class="hidden mt-4 text-center">
                         <img id="imagePreview" src="#" alt="선택된 추억 사진 미리보기" class="max-h-48 rounded-md shadow-md mx-auto"/>
@@ -249,6 +277,7 @@
                 </div>
             </section>
             
+            <!-- 5. 버튼 그룹 -->
             <section class="pt-8">
                 <h2 class="sr-only">카드 생성 및 저장 옵션</h2>
                 <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
@@ -257,10 +286,10 @@
                             aria-label="카드 미리보기 보기">
                         미리보기 🖼️
                     </button>
-                    <button type="button" id="generatePdfBtn" 
+                    <button type="button" id="downloadImageBtn" 
                             class="w-full sm:w-auto px-8 py-3 bg-sky-500 text-white font-bold rounded-lg hover:bg-sky-600 transition no-print focus-visible"
-                            aria-label="카드를 PDF 파일로 저장">
-                        PDF로 저장하기 💌
+                            aria-label="카드를 이미지 파일로 저장">
+                        이미지로 저장하기 🖼️
                     </button>
                     <button type="button" id="createShareLinkBtnRecipe" 
                             class="w-full sm:w-auto px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition hidden no-print focus-visible"
@@ -270,9 +299,17 @@
                 </div>
             </section>
 
+            <!-- 공유 링크 영역 -->
             <section id="shareLinkRecipeContainer" class="mt-4 hidden no-print" aria-labelledby="share-link-title">
-                <h3 id="share-link-title" class="block text-sm font-medium text-gray-700 mb-1">공유 링크 (이미지 제외됨)</h3>
-                <div id="dynamicShareWarning" class="text-xs text-red-500 mb-1 hidden" role="alert" aria-live="polite"></div>
+                <h3 id="share-link-title" class="block text-sm font-medium text-gray-700 mb-1">공유 링크 (텍스트 정보만)</h3>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-3">
+                    <p class="text-xs text-yellow-800 mb-1">
+                        <strong>📝 텍스트 정보만 공유됩니다</strong><br>
+                        • 첨부하신 사진은 공유 링크에 포함되지 않습니다<br>
+                        • 사진 포함 공유: "이미지로 저장하기" 후 직접 전송해주세요
+                    </p>
+                </div>
+                <p id="dynamicShareWarning" class="text-xs text-red-500 mb-1 hidden" role="alert" aria-live="polite"></p>
                 <div class="flex space-x-2">
                     <label for="shareableLinkRecipe" class="sr-only">생성된 공유 링크</label>
                     <input type="text" id="shareableLinkRecipe" readonly 
@@ -290,6 +327,7 @@
         </form>
     </main>
 
+    <!-- 미리보기 모달 -->
     <div id="previewModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 transition-opacity duration-300 no-print" 
          role="dialog" aria-labelledby="modal-title" aria-modal="true">
         <div class="bg-white p-4 rounded-xl shadow-2xl relative max-w-4xl w-auto">
@@ -301,91 +339,74 @@
         </div>
     </div>
 
+    <!-- 공유된 카드 표시 영역 -->
     <div id="sharedCardDisplayArea" class="w-full" role="main">
-        <div id="recipeCardWrapperShared" class="mx-auto" aria-label="공유된 카드 (이미지 제외됨)"></div>
-        <button id="printSharedCardBtn" 
+        <div id="recipeCardWrapperShared" class="mx-auto" aria-label="공유된 카드"></div>
+        <button id="downloadSharedCardBtn" 
                 class="block mx-auto mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition no-print focus-visible"
-                aria-label="이 카드 PDF로 저장하기">
-            이 카드 PDF로 저장하기 🖨️
+                aria-label="이 카드를 이미지로 저장하기">
+            이 카드 이미지로 저장하기 🖼️
         </button>
     </div>
 
+    <!-- 상태 메시지 영역 (스크린 리더용) -->
     <div id="status-messages" aria-live="polite" aria-atomic="true" class="sr-only"></div>
     
     <script>
-        let jsPDFInstance = null; 
+        // 전역 변수
         let uploadedImageSrc = '';
         let originalUploadedImageSize = 0; 
         let lastCardData = null;
-        // fontsLoaded 변수는 이제 사용하지 않으므로 제거 가능 (또는 항상 true로 설정)
-        // let fontsLoaded = true; // 시스템 폰트를 사용하므로 로딩 대기 불필요
 
+        // DOM 요소들
         const form = document.getElementById('recipeForm');
         const mainContentDiv = document.getElementById('mainContent');
         const addIngredientBtn = document.getElementById('addIngredientBtn');
         const ingredientsContainer = document.getElementById('ingredients-container');
         const imageUpload = document.getElementById('imageUpload');
-        // const imageUploadOverallWarning = document.getElementById('imageUploadOverallWarning'); // 안내문구 변경으로 불필요
+        const imageUploadOverallWarning = document.getElementById('imageUploadOverallWarning');
         const imagePreview = document.getElementById('imagePreview');
         const imagePreviewContainer = document.getElementById('imagePreviewContainer');
         const deleteImageBtn = document.getElementById('deleteImageBtn');
         const previewBtn = document.getElementById('previewBtn');
-        const generatePdfBtn = document.getElementById('generatePdfBtn');
+        const downloadImageBtn = document.getElementById('downloadImageBtn');
         const createShareLinkBtnRecipe = document.getElementById('createShareLinkBtnRecipe');
         const shareLinkRecipeContainer = document.getElementById('shareLinkRecipeContainer');
         const shareableLinkRecipeInput = document.getElementById('shareableLinkRecipe');
         const copyLinkBtnRecipe = document.getElementById('copyLinkBtnRecipe');
         const copyFeedbackRecipe = document.getElementById('copyFeedbackRecipe');
-        const dynamicShareWarning = document.getElementById('dynamicShareWarning'); // 이제 사용되지 않음
+        const dynamicShareWarning = document.getElementById('dynamicShareWarning');
         const previewModal = document.getElementById('previewModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const recipeCardWrapper = document.getElementById('recipeCardWrapper'); 
         const sharedCardDisplayArea = document.getElementById('sharedCardDisplayArea');
         const recipeCardWrapperShared = document.getElementById('recipeCardWrapperShared');
-        const printSharedCardBtn = document.getElementById('printSharedCardBtn');
+        const downloadSharedCardBtn = document.getElementById('downloadSharedCardBtn');
         const statusMessages = document.getElementById('status-messages');
 
-        function initializeLibraries() {
-            const checkJsPDF = () => {
-                if (window.jspdf && window.jspdf.jsPDF) {
-                    jsPDFInstance = window.jspdf.jsPDF;
-                    return true;
-                }
-                return false;
-            };
-            if (!checkJsPDF()) {
-                setTimeout(() => {
-                    if (!checkJsPDF()) {
-                        console.warn('jsPDF 라이브러리 로딩에 실패했습니다. PDF 저장 기능이 작동하지 않을 수 있습니다.');
-                        announceToScreenReader('PDF 저장 라이브러리 로딩에 실패했습니다. 일부 기능이 제한될 수 있습니다.');
-                    }
-                }, 1500);
-            }
-        }
-
+        // 접근성 - 스크린 리더에 메시지 전달
         function announceToScreenReader(message) {
             statusMessages.textContent = message;
             setTimeout(() => {
                 statusMessages.textContent = '';
-            }, 1500); 
+            }, 1000);
         }
 
+        // 접근성 - 키보드 네비게이션
         function setupKeyboardNavigation() {
+            // 테마 선택 키보드 지원
             document.querySelectorAll('label[for^="theme-"]').forEach(label => {
                 label.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        const inputId = label.getAttribute('for');
-                        if (inputId) {
-                            const input = document.getElementById(inputId);
-                            if (input) {
-                                input.checked = true;
-                                announceToScreenReader(`${label.textContent.trim()} 테마가 선택되었습니다.`);
-                            }
-                        }
+                        const input = document.getElementById(label.getAttribute('for'));
+                        input.checked = true;
+                        announceToScreenReader(`${label.textContent} 테마가 선택되었습니다.`);
                     }
                 });
             });
+
+            // ESC 키로 모달 닫기
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && !previewModal.classList.contains('hidden')) {
                     closeModal();
@@ -393,15 +414,64 @@
             });
         }
 
-        const themes = { // 테마 정의는 이전과 동일
-            pastel: { cardClass: "bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-100", titleClass: "text-sky-700", subTitleClass: "text-pink-500", toFromClass: "text-gray-700", toNameClass: "text-pink-600", fromNameClass: "text-blue-600", sectionBgClass: "bg-white/60", ingTitleClass: "text-yellow-600", instTitleClass: "text-lime-600", footerClass: "text-gray-500", footerBgClass: "bg-white/60" },
-            green: { cardClass: "bg-gradient-to-br from-green-100 to-lime-200", titleClass: "text-green-800", subTitleClass: "text-green-600", toFromClass: "text-gray-700", toNameClass: "text-emerald-600", fromNameClass: "text-teal-600", sectionBgClass: "bg-white/70", ingTitleClass: "text-yellow-700", instTitleClass: "text-green-700", footerClass: "text-gray-600", footerBgClass: "bg-white/70" },
-            orange: { cardClass: "bg-gradient-to-br from-orange-100 to-amber-200", titleClass: "text-orange-800", subTitleClass: "text-red-500", toFromClass: "text-gray-700", toNameClass: "text-red-600", fromNameClass: "text-yellow-700", sectionBgClass: "bg-white/70", ingTitleClass: "text-amber-700", instTitleClass: "text-orange-700", footerClass: "text-gray-600", footerBgClass: "bg-white/70" },
-            navy: { cardClass: "bg-gray-800 text-white", titleClass: "text-amber-300", subTitleClass: "text-sky-300", toFromClass: "text-gray-300", toNameClass: "text-pink-300", fromNameClass: "text-sky-300", sectionBgClass: "bg-gray-700/50", ingTitleClass: "text-yellow-300", instTitleClass: "text-lime-300", footerClass: "text-gray-400", footerBgClass: "bg-gray-700/50" }
+        // 테마 정의
+        const themes = {
+            pastel: { 
+                cardClass: "bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-100", 
+                titleClass: "text-sky-700", 
+                subTitleClass: "text-pink-500", 
+                toFromClass: "text-gray-700", 
+                toNameClass: "text-pink-600", 
+                fromNameClass: "text-blue-600", 
+                sectionBgClass: "bg-white/60", 
+                ingTitleClass: "text-yellow-600", 
+                instTitleClass: "text-lime-600", 
+                footerClass: "text-gray-500", 
+                footerBgClass: "bg-white/60" 
+            },
+            green: { 
+                cardClass: "bg-gradient-to-br from-green-100 to-lime-200", 
+                titleClass: "text-green-800", 
+                subTitleClass: "text-green-600", 
+                toFromClass: "text-gray-700", 
+                toNameClass: "text-emerald-600", 
+                fromNameClass: "text-teal-600", 
+                sectionBgClass: "bg-white/70", 
+                ingTitleClass: "text-yellow-700", 
+                instTitleClass: "text-green-700", 
+                footerClass: "text-gray-600", 
+                footerBgClass: "bg-white/70" 
+            },
+            orange: { 
+                cardClass: "bg-gradient-to-br from-orange-100 to-amber-200", 
+                titleClass: "text-orange-800", 
+                subTitleClass: "text-red-500", 
+                toFromClass: "text-gray-700", 
+                toNameClass: "text-red-600", 
+                fromNameClass: "text-yellow-700", 
+                sectionBgClass: "bg-white/70", 
+                ingTitleClass: "text-amber-700", 
+                instTitleClass: "text-orange-700", 
+                footerClass: "text-gray-600", 
+                footerBgClass: "bg-white/70" 
+            },
+            navy: { 
+                cardClass: "bg-gray-800 text-white", 
+                titleClass: "text-amber-300", 
+                subTitleClass: "text-sky-300", 
+                toFromClass: "text-gray-300", 
+                toNameClass: "text-pink-300", 
+                fromNameClass: "text-sky-300", 
+                sectionBgClass: "bg-gray-700/50", 
+                ingTitleClass: "text-yellow-300", 
+                instTitleClass: "text-lime-300", 
+                footerClass: "text-gray-400", 
+                footerBgClass: "bg-gray-700/50" 
+            }
         };
 
-        // generateCardHTML 함수: options.forOutput 값에 따라 이미지 처리 분기
-        function generateCardHTML(data, options = { forOutput: false }) {
+        // 카드 HTML 생성 함수
+        function generateCardHTML(data) {
             const currentTheme = themes[data.themeName] || themes.pastel;
             const creationDate = data.date || new Date().toLocaleDateString('ko-KR');
 
@@ -410,24 +480,17 @@
                 : ['믿음 한 줌', '웃음 2스푼', '배려 적당히', '소통 듬뿍'].map(ing => `<li><span class="${currentTheme.ingTitleClass} mr-1" aria-hidden="true">•</span> ${ing}</li>`).join('');
 
             const textLength = data.instructions.length;
-            let instClasses = ''; // font-family는 CSS에서 전역으로 제어
-            if (textLength > 300) instClasses = 'whitespace-pre-wrap leading-tight text-[12px]';
-            else if (textLength > 180) instClasses = 'whitespace-pre-wrap leading-normal text-[13px]';
-            else instClasses = 'whitespace-pre-wrap leading-normal text-sm';
+            let instClasses = 'text-sm whitespace-pre-wrap leading-normal';
+            if (textLength > 300) instClasses = 'text-[10px] whitespace-pre-wrap leading-tight';
+            else if (textLength > 180) instClasses = 'text-xs whitespace-pre-wrap leading-normal';
             
-            let imageHtml = '';
-            if (!options.forOutput && data.imageSrc) { // 일반 미리보기 시에만 실제 이미지 표시
-                imageHtml = `<div class="mt-4 ${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm">
-                                <h4 class="${currentTheme.toNameClass} mb-2 flex items-center">
-                                    <span class="mr-1" aria-hidden="true">📸</span> 추억 한 장
-                                </h4>
-                                <img src="${data.imageSrc}" alt="카드에 첨부된 추억 사진" class="rounded-md shadow-sm w-full max-h-24 object-contain"/>
-                            </div>`;
-            } else if (options.forOutput) { // PDF 또는 공유 카드 보기 시 안내 문구
-                imageHtml = `<div class="mt-4 ${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm text-center">
-                                <p class="text-sm ${currentTheme.toFromClass}">(이미지 영역 - 필요시 화면 캡처 활용)</p>
-                             </div>`;
-            }
+            const imageHtml = data.imageSrc ? 
+                 `<div class="mt-4 ${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm">
+                      <h4 class="text-lg font-bold ${currentTheme.toNameClass} mb-2 flex items-center">
+                          <span class="mr-1" aria-hidden="true">📸</span> 추억 한 장
+                      </h4>
+                      <img src="${data.imageSrc}" alt="카드에 첨부된 추억 사진" class="rounded-md shadow-sm w-full max-h-24 object-contain"/>
+                  </div>` : '';
             
             const cardClasses = `p-4 rounded-xl shadow-lg w-full h-auto flex flex-col justify-between ${currentTheme.cardClass}`;
             const borderColor = data.themeName === 'navy' ? '#4b5563' : 'white';
@@ -435,9 +498,9 @@
             return `
             <div id="recipeCard" class="${cardClasses}" 
                  style="border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 3px dashed ${borderColor};"
-                 role="article" aria-labelledby="card-title-${data.recipeName}">
+                 role="article" aria-labelledby="card-title">
                 <header class="text-center">
-                    <h2 id="card-title-${data.recipeName}" class="${currentTheme.titleClass} leading-tight">${data.recipeName}</h2>
+                    <h2 id="card-title" class="text-3xl font-bold ${currentTheme.titleClass} leading-tight">${data.recipeName}</h2>
                     <p class="text-lg ${currentTheme.subTitleClass} mt-1">✨ 우정을 위한 특별한 레시피 ✨</p>
                     <div class="flex justify-between items-center text-md ${currentTheme.toFromClass} mt-2 mb-3" role="group" aria-label="카드 수신자와 발신자">
                         <span class="bg-opacity-50 px-3 py-1 rounded-full text-xs ${currentTheme.sectionBgClass}">
@@ -452,9 +515,9 @@
                 </header>
                 
                 <main class="flex-1 flex gap-4"> 
-                    <section class="flex-1 space-y-3 pr-1" aria-labelledby="ingredients-title-${data.recipeName}"> 
+                    <section class="flex-1 space-y-3 pr-1" aria-labelledby="ingredients-title"> 
                         <div class="${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm">
-                            <h3 id="ingredients-title-${data.recipeName}" class="${currentTheme.ingTitleClass} mb-2 flex items-center">
+                            <h3 id="ingredients-title" class="text-xl font-bold ${currentTheme.ingTitleClass} mb-2 flex items-center">
                                 <span class="mr-1" aria-hidden="true">⭐</span> 우정 재료
                             </h3>
                             <ul class="space-y-1 text-sm ${currentTheme.toFromClass}" role="list">${ingredientsHtml}</ul>
@@ -462,9 +525,9 @@
                         ${imageHtml}
                     </section>
                     
-                    <section class="flex-1" aria-labelledby="instructions-title-${data.recipeName}">
+                    <section class="flex-1" aria-labelledby="instructions-title">
                         <div class="${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm h-auto">
-                            <h3 id="instructions-title-${data.recipeName}" class="${currentTheme.instTitleClass} mb-2 flex items-center">
+                            <h3 id="instructions-title" class="text-xl font-bold ${currentTheme.instTitleClass} mb-2 flex items-center">
                                 <span class="mr-1" aria-hidden="true">🍳</span> 만드는 방법
                             </h3>
                             <p class="${instClasses} ${currentTheme.toFromClass}">${data.instructions}</p>
@@ -480,7 +543,8 @@
             </div>`;
         }
         
-        function getCurrentFormData() { // 이전과 동일, imageSrc는 미리보기에만 활용됨
+        // 현재 폼 데이터 수집
+        function getCurrentFormData() {
             return {
                 themeName: document.querySelector('input[name="theme"]:checked').value,
                 recipeName: document.getElementById('recipe_name').value || '소중한 우정 레시피',
@@ -488,13 +552,14 @@
                 senderName: document.getElementById('sender_name').value || '너의 진정한 친구가',
                 instructions: document.getElementById('instructions').value || '이 레시피의 비법은 바로 사랑입니다!',
                 ingredients: Array.from(document.querySelectorAll('.ingredient-input')).map(i => i.value).filter(v => v),
-                imageSrc: uploadedImageSrc, 
+                imageSrc: uploadedImageSrc,
                 originalImageSize: originalUploadedImageSize, 
                 date: new Date().toLocaleDateString('ko-KR')
             };
         }
 
-        function addIngredient() { // 이전과 동일 (접근성 속성 추가)
+        // 재료 추가 함수
+        function addIngredient() {
             const ingredientDiv = document.createElement('div');
             ingredientDiv.className = 'flex items-center space-x-2';
             
@@ -518,23 +583,25 @@
             ingredientDiv.appendChild(removeBtn);
             ingredientsContainer.appendChild(ingredientDiv);
             
+            // 새로 추가된 입력 필드에 포커스
             newInput.focus();
             announceToScreenReader('새 재료 입력 필드가 추가되었습니다.');
         }
 
-        function handleImageUpload(event) { // 이전과 동일 (alt 속성 및 SR 안내 추가)
+        // 이미지 업로드 처리
+        function handleImageUpload(event) {
             const file = event.target.files[0];
             if (file) {
-                const maxSize = 1 * 1024 * 1024; // 1MB 제한
+                const maxSize = 5 * 1024 * 1024; // 5MB로 제한 완화
                 if (file.size > maxSize) {
-                    alert("이미지 파일 용량이 너무 큽니다 (최대 1MB). 더 작은 파일을 선택해주세요.");
+                    alert("이미지 파일 용량이 너무 큽니다 (최대 5MB). 더 작은 파일을 선택해주세요.");
                     imageUpload.value = ""; 
                     uploadedImageSrc = '';
                     originalUploadedImageSize = 0;
-                    imagePreview.src = '#'; imagePreview.alt = '';
+                    imagePreview.src = '#';
                     imagePreviewContainer.classList.add('hidden');
                     deleteImageBtn.classList.add('hidden');
-                    announceToScreenReader('이미지 파일이 너무 큽니다. 1MB 이하의 파일을 선택해주세요.');
+                    announceToScreenReader('이미지 파일이 너무 큽니다. 5MB 이하의 파일을 선택해주세요.');
                     return;
                 }
                 
@@ -546,115 +613,161 @@
                     imagePreview.alt = `업로드된 이미지: ${file.name}`;
                     imagePreviewContainer.classList.remove('hidden');
                     deleteImageBtn.classList.remove('hidden');
-                    announceToScreenReader('이미지가 성공적으로 업로드되어 미리보기에 표시됩니다.');
+                    announceToScreenReader('이미지가 성공적으로 업로드되었습니다.');
                 };
                 reader.onerror = () => {
                     announceToScreenReader('이미지 업로드 중 오류가 발생했습니다.');
                 };
                 reader.readAsDataURL(file);
             } else {
-                deleteImage(); // 파일 선택 취소 시 이미지 초기화
+                uploadedImageSrc = '';
+                originalUploadedImageSize = 0;
+                imagePreview.src = '#';
+                imagePreview.alt = '';
+                imagePreviewContainer.classList.add('hidden');
+                deleteImageBtn.classList.add('hidden');
             }
         }
 
-        function deleteImage() { // 이전과 동일 (alt 속성 초기화 및 SR 안내 추가)
+        // 이미지 삭제
+        function deleteImage() {
             uploadedImageSrc = '';
             originalUploadedImageSize = 0;
             imageUpload.value = "";
-            imagePreview.src = '#'; imagePreview.alt = '';
+            imagePreview.src = '#';
+            imagePreview.alt = '';
             imagePreviewContainer.classList.add('hidden');
             deleteImageBtn.classList.add('hidden');
-            announceToScreenReader('첨부 이미지가 삭제되었습니다.');
+            announceToScreenReader('이미지가 삭제되었습니다.');
         }
 
-        function showPreview() { // generateCardHTML 호출 시 옵션 없음 (이미지 포함)
+        // 미리보기 표시
+        function showPreview() {
             lastCardData = getCurrentFormData();
             document.getElementById('recipeCardWrapper').style.height = 'auto'; 
-            recipeCardWrapper.innerHTML = generateCardHTML(lastCardData, { forOutput: false }); 
+            recipeCardWrapper.innerHTML = generateCardHTML(lastCardData);
             previewModal.classList.remove('hidden');
             createShareLinkBtnRecipe.classList.remove('hidden'); 
-            announceToScreenReader('카드 미리보기가 생성되었습니다. ESC 키로 닫을 수 있습니다.');
-            setTimeout(() => { closeModalBtn.focus(); }, 100);
+            announceToScreenReader('카드 미리보기가 생성되었습니다.');
+            
+            // 모달이 열리면 닫기 버튼에 포커스
+            setTimeout(() => {
+                closeModalBtn.focus();
+            }, 100);
         }
 
-        function closeModal() { // 이전과 동일 (포커스 복귀 및 SR 안내 추가)
+        // 모달 닫기
+        function closeModal() {
             previewModal.classList.add('hidden');
+            // 모달을 연 버튼으로 포커스 복귀
             previewBtn.focus();
             announceToScreenReader('미리보기가 닫혔습니다.');
         }
 
-        // PDF 생성 함수: generateCardHTML 호출 시 forOutput: true 전달
-        async function generatePDF() {
-            const originalText = generatePdfBtn.innerText;
-            generatePdfBtn.innerText = 'PDF 만드는 중...';
-            generatePdfBtn.disabled = true;
-            generatePdfBtn.classList.add('loading');
-            announceToScreenReader('PDF 생성을 시작합니다.');
-            
+        // 이미지 다운로드 공통 함수
+        async function downloadCardAsImage(cardElement, fileName, successMessage) {
             try {
-                if (typeof html2canvas === 'undefined') throw new Error('html2canvas 라이브러리가 로드되지 않았습니다.');
-                if (!jsPDFInstance) throw new Error('jsPDF 라이브러리가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.');
-                
-                if (!lastCardData) { 
-                    lastCardData = getCurrentFormData();
+                // html2canvas 라이브러리 로딩 확인
+                if (typeof html2canvas === 'undefined') {
+                    throw new Error('html2canvas 라이브러리가 로드되지 않았습니다.');
                 }
-                // PDF용 HTML 생성 (이미지 영역은 안내 문구로 대체됨)
-                document.getElementById('recipeCardWrapper').style.height = 'auto';
-                recipeCardWrapper.innerHTML = generateCardHTML(lastCardData, { forOutput: true }); 
                 
-                const cardToCapture = recipeCardWrapper.querySelector('#recipeCard');
-                if (!cardToCapture) throw new Error("PDF 생성 준비 중 오류 발생 (카드 요소를 찾을 수 없음).");
-                
-                await new Promise(resolve => setTimeout(resolve, 300)); 
+                // 시스템 폰트 사용으로 폰트 로딩 대기 불필요
+                await new Promise(resolve => setTimeout(resolve, 300)); // 최소한의 렌더링 시간 보장
 
-                const canvas = await html2canvas(cardToCapture, { 
-                    scale: 1.0, 
+                const canvas = await html2canvas(cardElement, { 
+                    scale: 2.0, // 고해상도를 위해 스케일 증가
                     useCORS: true, 
                     logging: false, 
                     backgroundColor: '#ffffff',
-                    onclone: function(clonedDoc) { // PDF 생성 시 스크린리더 전용 텍스트 제거
+                    onclone: function(clonedDoc) {
+                        // 접근성 요소들이 이미지에 영향을 주지 않도록 정리
                         const srOnlyElements = clonedDoc.querySelectorAll('.sr-only');
                         srOnlyElements.forEach(el => el.remove());
                         return clonedDoc;
                     }
                 });
-                const imgData = canvas.toDataURL('image/png', 0.92);
                 
-                const cardWidthMM = 148; 
-                const cardHeightMM = (canvas.height / canvas.width) * cardWidthMM;
-
-                const doc = new jsPDFInstance(cardHeightMM > cardWidthMM ? 'p' : 'l', 'mm', [cardWidthMM, cardHeightMM]);
-                doc.addImage(imgData, 'PNG', 0, 0, cardWidthMM, cardHeightMM, undefined, 'FAST');
-                const fileName = `${(lastCardData.recipeName || '우정레시피카드').replace(/[^\s\W]/g, '') || '우정카드'}_학습지.pdf`;
-                doc.save(fileName);
-                alert('PDF가 성공적으로 생성되었습니다! (이미지 제외 버전)\n이미지가 포함된 카드는 미리보기 화면을 직접 캡처해주세요.');
-                announceToScreenReader('PDF가 성공적으로 생성되어 다운로드되었습니다.');
+                // 이미지 다운로드
+                const imgData = canvas.toDataURL('image/png', 0.95); // 고품질
+                
+                // 다운로드 링크 생성
+                const downloadLink = document.createElement('a');
+                downloadLink.href = imgData;
+                downloadLink.download = fileName;
+                downloadLink.style.display = 'none';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                announceToScreenReader('이미지가 성공적으로 생성되어 다운로드되었습니다.');
+                alert(successMessage);
                 
             } catch (error) {
-                console.error("PDF 생성 중 상세 오류:", error);
-                alert(`PDF 생성 중 오류가 발생했습니다: ${error.message}\n페이지를 새로고침하고 다시 시도해주세요. 문제가 지속되면 내용(특히 긴 텍스트)을 줄여보세요.`);
-                announceToScreenReader('PDF 생성 중 오류가 발생했습니다.');
-            } finally {
-                generatePdfBtn.innerText = originalText;
-                generatePdfBtn.disabled = false;
-                generatePdfBtn.classList.remove('loading');
+                console.error("이미지 생성 중 상세 오류:", error);
+                let errorMessage = "이미지 생성 중 오류가 발생했습니다.\n";
+                
+                if (error.message.includes('미리보기')) {
+                    errorMessage += error.message;
+                } else if (error.message.includes('html2canvas')) {
+                    errorMessage += "라이브러리 문제일 수 있습니다. 페이지를 새로고침하거나 다른 브라우저에서 시도해보세요.";
+                } else {
+                    errorMessage += "오류가 지속되면, 카드 내용(특히 매우 긴 텍스트나 복잡한 재료 목록)을 조금 줄여보거나, 이미지 없이 시도해보세요.";
+                }
+                
+                alert(errorMessage);
+                announceToScreenReader('이미지 생성 중 오류가 발생했습니다.');
+                throw error;
             }
         }
 
-        // 공유 링크 생성 함수: 이미지 데이터 제외
-        function createShareLink() {
-            if (!lastCardData) { 
-                lastCardData = getCurrentFormData(); // 데이터가 없으면 현재 폼에서 가져옴
+        // 메인 이미지 다운로드
+        async function downloadImage() {
+            const originalText = downloadImageBtn.innerText;
+            downloadImageBtn.innerText = '이미지 만드는 중...';
+            downloadImageBtn.disabled = true;
+            downloadImageBtn.classList.add('loading');
+            announceToScreenReader('이미지 생성을 시작합니다.');
+            
+            try {
+                if (!lastCardData) { 
+                    lastCardData = getCurrentFormData();
+                    document.getElementById('recipeCardWrapper').style.height = 'auto';
+                    recipeCardWrapper.innerHTML = generateCardHTML(lastCardData);
+                } else {
+                    document.getElementById('recipeCardWrapper').style.height = 'auto';
+                    recipeCardWrapper.innerHTML = generateCardHTML(lastCardData);
+                }
+                
+                const cardToCapture = recipeCardWrapper.querySelector('#recipeCard');
+                if (!cardToCapture) {
+                    throw new Error("미리보기 후 이미지 저장을 시도해주세요 (카드 요소를 찾을 수 없음).");
+                }
+                
+                const fileName = `${(lastCardData.recipeName || '우정레시피카드').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ一-龠ぁ-ゔァ-ヴー]/g, '_')}.png`;
+                const successMessage = '이미지가 성공적으로 생성되었습니다! 🖼️\n첨부하신 사진도 모두 포함되어 있습니다.';
+                
+                await downloadCardAsImage(cardToCapture, fileName, successMessage);
+                
+            } catch (error) {
+                // 오류 처리는 downloadCardAsImage에서 수행
+            } finally {
+                downloadImageBtn.innerText = originalText;
+                downloadImageBtn.disabled = false;
+                downloadImageBtn.classList.remove('loading');
             }
-             // 미리보기를 먼저 하도록 유도할 수도 있습니다.
-            if (!lastCardData.recipeName && !lastCardData.friendName && !lastCardData.senderName && lastCardData.ingredients.length === 0 && !lastCardData.instructions) {
-                 alert("공유할 내용이 없습니다. 먼저 카드를 작성하고 미리보기를 해주세요.");
-                 announceToScreenReader('공유할 내용이 없습니다. 먼저 카드를 작성해주세요.');
-                 return;
-            }
+        }
 
+        // 공유 링크 생성 (텍스트 정보만, 이미지 제외)
+        function createShareLink() {
+            if (!lastCardData) {
+                alert("먼저 미리보기를 통해 레시피 카드를 생성해주세요.");
+                announceToScreenReader('먼저 미리보기를 생성해주세요.');
+                return;
+            }
+            
             const params = new URLSearchParams();
-            params.append('v', '2'); // 버전 정보 업데이트 (이미지 처리 방식 변경)
+            params.append('v', '1');
             params.append('theme', encodeURIComponent(lastCardData.themeName));
             params.append('recipeName', encodeURIComponent(lastCardData.recipeName));
             params.append('friendName', encodeURIComponent(lastCardData.friendName));
@@ -662,24 +775,29 @@
             params.append('instructions', encodeURIComponent(lastCardData.instructions));
             params.append('ingredients', encodeURIComponent(JSON.stringify(lastCardData.ingredients)));
             params.append('date', encodeURIComponent(lastCardData.date));
-            // imageSrc는 의도적으로 포함하지 않음
+            
+            // 이미지는 안정성을 위해 공유 링크에서 제외
+            // 사용자는 이미지 다운로드 후 별도 공유 권장
 
             const baseUrl = window.location.origin + window.location.pathname;
             const shareUrl = `${baseUrl}?${params.toString()}`;
             
             shareableLinkRecipeInput.value = shareUrl;
             shareLinkRecipeContainer.classList.remove('hidden');
-            // dynamicShareWarning.classList.add('hidden'); // 이미지 미포함이므로 길이 경고 불필요
-
-            copyFeedbackRecipe.classList.add('hidden');
-            announceToScreenReader('공유 링크가 생성되었습니다.');
             
-            if (confirm("생성된 공유 링크(이미지 제외)를 새 탭에서 열어 확인하시겠습니까?")) {
+            // 이미지 관련 경고는 제거 (이미지를 포함하지 않으므로)
+            dynamicShareWarning.classList.add('hidden');
+            
+            copyFeedbackRecipe.classList.add('hidden');
+            announceToScreenReader('공유 링크가 생성되었습니다. 텍스트 정보만 포함됩니다.');
+            
+            if (confirm("생성된 공유 링크를 새 탭에서 열어 확인하시겠습니까?\n(첨부하신 사진은 포함되지 않습니다)")) {
                 window.open(shareUrl, '_blank');
             }
         }
 
-        function copyShareLink() { // 이전과 동일 (SR 안내 개선)
+        // 링크 복사
+        function copyShareLink() {
             shareableLinkRecipeInput.select();
             try {
                 navigator.clipboard.writeText(shareableLinkRecipeInput.value)
@@ -701,11 +819,46 @@
             }
         }
 
-        // 공유된 카드 로드 함수: generateCardHTML 호출 시 forOutput: true 전달
+        // 공유된 카드 다운로드
+        async function downloadSharedCard() {
+            const originalText = downloadSharedCardBtn.innerText;
+            downloadSharedCardBtn.innerText = '이미지 생성 중...';
+            downloadSharedCardBtn.disabled = true;
+            downloadSharedCardBtn.classList.add('loading');
+            
+            const cardToPrint = recipeCardWrapperShared.querySelector('#recipeCard');
+            if (cardToPrint) {
+                try {
+                    announceToScreenReader('이미지 생성을 시작합니다.');
+                    
+                    // URL에서 레시피 이름 가져오기
+                    const params = new URLSearchParams(window.location.search);
+                    const recipeName = decodeURIComponent(params.get('recipeName') || '우정레시피카드');
+                    const fileName = `${recipeName.replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ一-龠ぁ-ゔァ-ヴー]/g, '_')}_shared.png`;
+                    const successMessage = '이미지가 성공적으로 생성되었습니다! 🖼️';
+                    
+                    await downloadCardAsImage(cardToPrint, fileName, successMessage);
+                    
+                } catch (error) {
+                    // 오류 처리는 downloadCardAsImage에서 수행
+                } finally {
+                    downloadSharedCardBtn.innerText = '이 카드 이미지로 저장하기 🖼️';
+                    downloadSharedCardBtn.disabled = false;
+                    downloadSharedCardBtn.classList.remove('loading');
+                }
+            } else {
+                alert('저장할 카드를 찾을 수 없습니다.');
+                announceToScreenReader('저장할 카드를 찾을 수 없습니다.');
+                downloadSharedCardBtn.innerText = '이 카드 이미지로 저장하기 🖼️';
+                downloadSharedCardBtn.disabled = false;
+                downloadSharedCardBtn.classList.remove('loading');
+            }
+        }
+
+        // 공유된 카드 로드 (텍스트 정보만)
         function loadSharedCard() {
             const params = new URLSearchParams(window.location.search);
-            // v=2 파라미터로 새로운 공유 방식 카드인지 확인 가능
-            if (params.has('recipeName') && (params.get('v') === '1' || params.get('v') === '2')) {
+            if (params.has('recipeName') && params.get('v') === '1') {
                 const sharedData = {
                     themeName: decodeURIComponent(params.get('theme') || 'pastel'),
                     recipeName: decodeURIComponent(params.get('recipeName')),
@@ -713,8 +866,7 @@
                     senderName: decodeURIComponent(params.get('senderName')),
                     instructions: decodeURIComponent(params.get('instructions')),
                     ingredients: JSON.parse(decodeURIComponent(params.get('ingredients') || '[]')),
-                    // imageSrc는 v1 링크에는 있을 수 있으나, v2 링크에는 없음. forOutput: true로 처리.
-                    imageSrc: params.has('imageSrc') && params.get('v') === '1' ? decodeURIComponent(params.get('imageSrc')) : '', 
+                    imageSrc: '', // 공유 링크에서는 이미지 제외
                     date: decodeURIComponent(params.get('date'))
                 };
 
@@ -722,86 +874,39 @@
                 previewModal.classList.add('hidden');
                 
                 document.getElementById('recipeCardWrapperShared').style.height = 'auto';
-                // 공유된 카드는 항상 이미지 영역을 안내 문구로 표시 (options.forOutput: true)
-                recipeCardWrapperShared.innerHTML = generateCardHTML(sharedData, { forOutput: true }); 
+                recipeCardWrapperShared.innerHTML = generateCardHTML(sharedData);
                 
                 sharedCardDisplayArea.classList.add('show');
-                announceToScreenReader('공유된 우정 레시피 카드가 로드되었습니다.');
-
-                printSharedCardBtn.onclick = async () => { 
-                    const originalText = printSharedCardBtn.innerText;
-                    printSharedCardBtn.innerText = 'PDF 생성 중...';
-                    printSharedCardBtn.disabled = true;
-                    printSharedCardBtn.classList.add('loading');
-                    
-                    const cardToPrint = recipeCardWrapperShared.querySelector('#recipeCard');
-                    if (cardToPrint) {
-                        try {
-                            announceToScreenReader('PDF 생성을 시작합니다.');
-                            if (!jsPDFInstance) throw new Error('jsPDF 라이브러리가 로드되지 않았습니다.');
-
-                            const canvas = await html2canvas(cardToPrint, { 
-                                scale: 1.0, useCORS: true, logging: false, backgroundColor: '#ffffff',
-                                onclone: function(clonedDoc) {
-                                    const srOnlyElements = clonedDoc.querySelectorAll('.sr-only');
-                                    srOnlyElements.forEach(el => el.remove());
-                                    return clonedDoc;
-                                }
-                            });
-                            const imgData = canvas.toDataURL('image/png', 0.92);
-                            
-                            const cardWidthMM = 148;
-                            const cardHeightMM = (canvas.height / canvas.width) * cardWidthMM;
-                            const doc = new jsPDFInstance(cardHeightMM > cardWidthMM ? 'p' : 'l', 'mm', [cardWidthMM, cardHeightMM]);
-                            doc.addImage(imgData, 'PNG', 0, 0, cardWidthMM, cardHeightMM);
-                            doc.save(`${(sharedData.recipeName || '우정레시피카드').replace(/[^\s\W]/g, '') || '우정카드'}_학습지_공유본.pdf`);
-                            alert('PDF가 성공적으로 생성되었습니다! (이미지 제외 버전)');
-                            announceToScreenReader('PDF가 성공적으로 생성되어 다운로드되었습니다.');
-                        } catch (error) {
-                            console.error("공유 카드 PDF 생성 중 오류:", error);
-                            alert(`PDF 생성 중 오류가 발생했습니다: ${error.message}`);
-                            announceToScreenReader('PDF 생성 중 오류가 발생했습니다.');
-                        } finally {
-                            printSharedCardBtn.innerText = originalText;
-                            printSharedCardBtn.disabled = false;
-                            printSharedCardBtn.classList.remove('loading');
-                        }
-                    } else {
-                        alert('저장할 카드를 찾을 수 없습니다.');
-                        announceToScreenReader('저장할 카드를 찾을 수 없습니다.');
-                        printSharedCardBtn.innerText = originalText;
-                        printSharedCardBtn.disabled = false;
-                        printSharedCardBtn.classList.remove('loading');
-                    }
-                };
             } else { 
                 sharedCardDisplayArea.classList.remove('show');
                 sharedCardDisplayArea.style.display = 'none'; 
                 mainContentDiv.style.display = 'block'; 
-                // imageUploadOverallWarning.classList.remove('hidden'); // 더 이상 이 경고는 의미 없음
+                imageUploadOverallWarning.classList.remove('hidden');
             }
         }
 
-        function initialize() {
-            initializeLibraries();
-            // initializeFonts(); // 시스템 폰트 사용으로 Web Font API 기반 로딩 대기 불필요
-            setupKeyboardNavigation();
-            setupEventListeners();
-            loadSharedCard();
-            announceToScreenReader('우정 레시피 카드 만들기 페이지가 로드되었습니다.');
-        }
-
+        // 이벤트 리스너 등록
         function setupEventListeners() {
             addIngredientBtn.addEventListener('click', addIngredient);
             imageUpload.addEventListener('change', handleImageUpload);
             deleteImageBtn.addEventListener('click', deleteImage);
             previewBtn.addEventListener('click', showPreview);
             closeModalBtn.addEventListener('click', closeModal);
-            generatePdfBtn.addEventListener('click', generatePDF);
+            downloadImageBtn.addEventListener('click', downloadImage);
             createShareLinkBtnRecipe.addEventListener('click', createShareLink);
             copyLinkBtnRecipe.addEventListener('click', copyShareLink);
+            downloadSharedCardBtn.addEventListener('click', downloadSharedCard);
         }
-        
+
+        // 초기화
+        function initialize() {
+            setupKeyboardNavigation();
+            setupEventListeners();
+            loadSharedCard();
+            announceToScreenReader('우정 레시피 카드 제작 도구가 로드되었습니다. 페이지의 모든 기능을 키보드로 이용할 수 있습니다.');
+        }
+
+        // DOM 로드 완료 후 초기화
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initialize);
         } else {
