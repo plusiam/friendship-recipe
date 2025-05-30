@@ -32,9 +32,11 @@
         #sharedCardDisplayArea.show {
             display: flex; /* 공유 모드일 때만 표시 */
         }
+        /* 카드 래퍼의 높이를 auto로 변경하여 내용에 따라 늘어나도록 함 */
         #recipeCardWrapper, #recipeCardWrapperShared {
             width: 560px; 
-            height: 400px; 
+            height: auto; /* 기존 400px에서 auto로 변경 */
+            min-height: 400px; /* 최소 높이 유지 */
             margin: auto; 
         }
         @media print {
@@ -43,7 +45,8 @@
             #recipeCard { 
                 position: absolute; left: 0; top: 0; 
                 width: 100vw;
-                height: calc(100vw * (400 / 560));
+                /* height: calc(100vw * (400 / 560)); */ /* 고정 비율 높이 대신 auto 또는 내용 기반 높이 */
+                height: auto; 
                 max-height: 100vh;
                 margin: 0; 
                 transform: scale(1);
@@ -66,6 +69,7 @@
         </div>
 
         <form id="recipeForm" onsubmit="return false;" class="space-y-6">
+            {/* ... 폼의 다른 부분들은 이전과 동일 ... */}
             <div>
                 <label class="text-lg font-semibold text-gray-700 mb-2 block">1. 카드 테마 선택</label>
                 <div id="theme-selector" class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -200,7 +204,8 @@
                       <img src="${data.imageSrc}" class="rounded-md shadow-sm w-full max-h-24 object-contain"/>
                   </div>` : '';
             
-            const cardClasses = `font-gowun p-4 rounded-xl shadow-lg w-full h-full flex flex-col justify-between ${currentTheme.cardClass}`;
+            // ★★★ 수정된 부분: 카드 전체 높이가 내용에 따라 늘어나도록 h-auto 사용 ★★★
+            const cardClasses = `font-gowun p-4 rounded-xl shadow-lg w-full h-auto flex flex-col justify-between ${currentTheme.cardClass}`;
             const borderColor = data.themeName === 'navy' ? '#4b5563' : 'white';
 
             return `
@@ -213,8 +218,10 @@
                         <span class="bg-opacity-50 px-3 py-1 rounded-full text-xs ${currentTheme.sectionBgClass}"><span class="font-semibold">From.</span> <span class="font-bold ${currentTheme.fromNameClass}">${data.senderName}</span></span>
                     </div>
                 </div>
-                <div class="flex-1 flex gap-4 overflow-hidden" style="max-height: 190px;">
-                    <div class="flex-1 space-y-3 overflow-y-auto pr-1">
+                {/* ★★★ 수정된 부분: max-height 및 overflow-hidden 제거 ★★★ */}
+                <div class="flex-1 flex gap-4"> 
+                    {/* ★★★ 수정된 부분: overflow-y-auto 제거 ★★★ */}
+                    <div class="flex-1 space-y-3 pr-1"> 
                         <div class="${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm">
                             <h3 class="text-xl font-dongle font-bold ${currentTheme.ingTitleClass} mb-2 flex items-center"><span class="mr-1">⭐</span> 우정 재료</h3>
                             <ul class="space-y-1 text-sm ${currentTheme.toFromClass}">${ingredientsHtml}</ul>
@@ -222,7 +229,8 @@
                         ${imageHtml}
                     </div>
                     <div class="flex-1">
-                        <div class="${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm h-full overflow-y-auto">
+                         {/* ★★★ 수정된 부분: overflow-y-auto 제거 및 h-auto로 변경 ★★★ */}
+                        <div class="${currentTheme.sectionBgClass} p-3 rounded-lg shadow-sm h-auto">
                             <h3 class="text-xl font-dongle font-bold ${currentTheme.instTitleClass} mb-2 flex items-center"><span class="mr-1">🍳</span> 만드는 방법</h3>
                             <p class="${instClasses} ${currentTheme.toFromClass}">${data.instructions}</p>
                         </div>
@@ -310,6 +318,8 @@
 
         previewBtn.addEventListener('click', () => {
             lastCardData = getCurrentFormData();
+            // 카드 생성 시 recipeCardWrapper의 높이가 auto이므로, 내용에 따라 카드 자체가 늘어남
+            document.getElementById('recipeCardWrapper').style.height = 'auto'; 
             recipeCardWrapper.innerHTML = generateCardHTML(lastCardData);
             previewModal.classList.remove('hidden');
             createShareLinkBtnRecipe.classList.remove('hidden'); 
@@ -327,23 +337,31 @@
                 
                 if (!lastCardData) { 
                     lastCardData = getCurrentFormData();
+                     // 카드 생성 시 recipeCardWrapper의 높이가 auto이므로, 내용에 따라 카드 자체가 늘어남
+                    document.getElementById('recipeCardWrapper').style.height = 'auto';
                     recipeCardWrapper.innerHTML = generateCardHTML(lastCardData);
                 } else {
                     // Ensure the card wrapper has the latest data if preview was shown but data changed
-                     recipeCardWrapper.innerHTML = generateCardHTML(lastCardData);
+                    document.getElementById('recipeCardWrapper').style.height = 'auto';
+                    recipeCardWrapper.innerHTML = generateCardHTML(lastCardData);
                 }
                 
                 const cardToCapture = recipeCardWrapper.querySelector('#recipeCard');
                 if (!cardToCapture) throw new Error("미리보기 후 PDF 저장을 시도해주세요 (카드 요소를 찾을 수 없음).");
                 
-                await new Promise(resolve => setTimeout(resolve, 500)); // Short delay for rendering
+                await new Promise(resolve => setTimeout(resolve, 500)); 
 
-                // ★★★ 수정된 부분: scale 값을 1.0으로 변경 ★★★
+                // html2canvas scale 값은 1.0으로 유지
                 const canvas = await html2canvas(cardToCapture, { scale: 1.0, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 const imgData = canvas.toDataURL('image/png', 0.92);
                 
-                const doc = new jsPDF('l', 'mm', [148, 105]); // A6 랜드스케이프 느낌 (148mm x 105mm)
-                doc.addImage(imgData, 'PNG', 0, 0, 148, 105, undefined, 'FAST');
+                // PDF 크기를 카드 내용에 맞게 조절 (예시: A4 비율에 맞춰 가로로 긴 카드)
+                // 실제 카드 크기를 가져와서 PDF 크기를 설정하는 것이 더 정확할 수 있음
+                const cardWidthMM = 148; // A6 가로 크기 예시, 필요시 조절
+                const cardHeightMM = (canvas.height / canvas.width) * cardWidthMM;
+
+                const doc = new jsPDF(cardHeightMM > cardWidthMM ? 'p' : 'l', 'mm', [cardWidthMM, cardHeightMM]);
+                doc.addImage(imgData, 'PNG', 0, 0, cardWidthMM, cardHeightMM, undefined, 'FAST');
                 const fileName = `${(lastCardData.recipeName || '우정레시피카드').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ一-龠ぁ-ゔァ-ヴー]/g, '_')}.pdf`;
                 doc.save(fileName);
                 alert('PDF가 성공적으로 생성되었습니다! 📄');
@@ -353,7 +371,7 @@
                 let errorMessage = "PDF 생성 중 오류가 발생했습니다.\n";
                 if (error.message.includes('미리보기')) errorMessage += error.message;
                 else if (error.message.includes('html2canvas') || error.message.includes('jsPDF')) errorMessage += "라이브러리 문제일 수 있습니다. 페이지를 새로고침하거나 다른 브라우저에서 시도해보세요.";
-                else errorMessage += "이미지가 너무 크거나 지원되지 않는 형식일 수 있습니다. 작은 JPG/PNG 이미지를 사용해보세요."; // This is a fallback
+                else errorMessage += "오류가 지속되면, 카드 내용(특히 매우 긴 텍스트나 복잡한 재료 목록)을 조금 줄여보거나, 웹 폰트 대신 기본 폰트를 사용하는 것을 고려해보세요.";
                 alert(errorMessage);
             } finally {
                 generatePdfBtn.innerText = 'PDF로 저장하기 💌';
@@ -362,6 +380,7 @@
         });
 
         createShareLinkBtnRecipe.addEventListener('click', function() {
+            // ... (이하 공유 링크 생성 로직은 이전과 동일) ...
             if (!lastCardData) {
                 alert("먼저 미리보기를 통해 레시피 카드를 생성해주세요.");
                 return;
@@ -385,8 +404,7 @@
             shareableLinkRecipeInput.value = shareUrl;
             shareLinkRecipeContainer.classList.remove('hidden');
             
-            // 동적 경고 메시지
-            if (lastCardData.imageSrc && lastCardData.originalImageSize && lastCardData.originalImageSize > 200 * 1024) { // 200KB 초과 시
+            if (lastCardData.imageSrc && lastCardData.originalImageSize && lastCardData.originalImageSize > 200 * 1024) { 
                 const imageSizeKB = Math.round(lastCardData.originalImageSize / 1024);
                 dynamicShareWarning.textContent = `현재 포함된 이미지 크기(약 ${imageSizeKB}KB)로 인해 URL이 매우 길어졌습니다. 일부 환경에서 공유가 원활하지 않을 수 있으니, 200KB 이하의 더 작은 이미지를 권장합니다.`;
                 dynamicShareWarning.classList.remove('hidden');
@@ -410,11 +428,11 @@
                         copyFeedbackRecipe.classList.remove('hidden');
                         setTimeout(() => copyFeedbackRecipe.classList.add('hidden'), 2500);
                     })
-                    .catch(err => { // Clipboard API 거부 또는 실패 시
+                    .catch(err => { 
                         copyFeedbackRecipe.textContent = "복사 실패. 직접 선택 후 복사해주세요.";
                         copyFeedbackRecipe.classList.remove('hidden');
                     });
-            } catch (err) { // navigator.clipboard 자체가 없는 구형 브라우저
+            } catch (err) { 
                 copyFeedbackRecipe.textContent = "복사 기능이 지원되지 않는 환경입니다. 직접 선택 후 복사해주세요.";
                 copyFeedbackRecipe.classList.remove('hidden');
             }
@@ -437,8 +455,7 @@
                 mainContentDiv.style.display = 'none';
                 previewModal.classList.add('hidden');
                 
-                recipeCardWrapperShared.style.width = '560px';
-                recipeCardWrapperShared.style.height = '400px';
+                document.getElementById('recipeCardWrapperShared').style.height = 'auto';
                 recipeCardWrapperShared.innerHTML = generateCardHTML(sharedData);
                 
                 sharedCardDisplayArea.classList.add('show');
@@ -449,16 +466,18 @@
                     const cardToPrint = recipeCardWrapperShared.querySelector('#recipeCard');
                     if (cardToPrint) {
                         try {
-                            // ★★★ 수정된 부분: scale 값을 1.0으로 변경 (공유 카드용) ★★★
                             const canvas = await html2canvas(cardToPrint, { scale: 1.0, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                             const imgData = canvas.toDataURL('image/png', 0.92);
-                            const doc = new jsPDF('l', 'mm', [148, 105]);
-                            doc.addImage(imgData, 'PNG', 0, 0, 148, 105);
+                            
+                            const cardWidthMM = 148;
+                            const cardHeightMM = (canvas.height / canvas.width) * cardWidthMM;
+                            const doc = new jsPDF(cardHeightMM > cardWidthMM ? 'p' : 'l', 'mm', [cardWidthMM, cardHeightMM]);
+                            doc.addImage(imgData, 'PNG', 0, 0, cardWidthMM, cardHeightMM);
                             doc.save(`${(sharedData.recipeName || '우정레시피카드').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ一-龠ぁ-ゔァ-ヴー]/g, '_')}_shared.pdf`);
                             alert('PDF가 성공적으로 생성되었습니다! 📄');
                         } catch (error) {
                             console.error("공유 카드 PDF 생성 중 오류:", error);
-                            alert("PDF 생성 중 오류가 발생했습니다. 이미지가 너무 크거나 지원되지 않는 형식일 수 있습니다.");
+                            alert("PDF 생성 중 오류가 발생했습니다.");
                         } finally {
                             printSharedCardBtn.innerText = '이 카드 PDF로 저장하기 🖨️';
                             printSharedCardBtn.disabled = false;
